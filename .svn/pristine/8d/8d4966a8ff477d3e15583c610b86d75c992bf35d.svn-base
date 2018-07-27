@@ -1,0 +1,8 @@
+var BaseDao = require('./BaseDao.js'),
+    models = require('../models/db.js'),
+    contactsModel = models.contacts;
+
+var contactsDao = function(){};
+contactsDao.prototype = new BaseDao(contactsModel);
+
+module.exports = contactsDao;

@@ -1,0 +1,14 @@
+var mongoose = require('mongoose'),
+    Schema = mongoose.Schema;
+
+var schema = new Schema({
+
+    'id': String, //id
+    'email': String,//验证码
+    'phone': Number,//手机号
+    'password': String,//登录密码
+    'create_date': String,//创建时间
+    'update_date': String//创建时间
+});
+
+mongoose.model('user', schema);

@@ -1,0 +1,53 @@
+/**
+ * 鉴权
+ */
+const jwt = require('jsonwebtoken')
+const util = require('util')
+const config = require('../config.js')
+
+/**
+ * 生成token
+ */
+module.exports.getToken = (playload) => {
+
+    return jwt.sign(
+        playload, // 有效载荷，一般为用户唯一标识
+        config.token_autograph,// 包含HMAC算法的密钥或RSA和ECDSA的PEM编码私钥的string或buffer，一般为签名
+        {
+            algorithm: 'HS256',//加密算法
+            expiresIn: '30d'//过期时间
+        }
+    )
+}
+
+/**
+ * 鉴权token
+ * @param {*} ctx 
+ * @param {*} next 
+ */
+module.exports.authentication = (ctx, next) => {
+
+    return new Promise((resolve, reject) => {
+
+
+        // 获取header中的token
+        let token = ctx.header.authorization;
+
+        if (token == "Bearer") {
+            ctx.body = { "err": null, "result": {} }
+            resolve(next());
+            return;
+        }
+
+        // 进行token合法校验
+        try {
+            util.promisify(jwt.verify)(token.split(' ')[1], config.token_autograph).then(e => {
+                resolve(next())
+            })
+        } catch (e) {
+            ctx.body = { "err": e, "result": null }
+            reject(e);
+        }
+
+    }).catch(error => console.log(error))
+}

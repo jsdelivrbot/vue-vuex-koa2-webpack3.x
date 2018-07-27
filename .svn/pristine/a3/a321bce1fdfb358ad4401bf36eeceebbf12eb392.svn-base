@@ -1,0 +1,14 @@
+const userDao = require('../daos/userDao')
+const config = require('../config.js')
+
+
+module.exports.getAll = async (ctx, next) => {
+
+    let result = await userDao.prototype.getAll().then(e => {
+        return e;
+    });
+
+    let data = result.data || [];
+
+    ctx.body = { "err": result.err, "result": { "contacts": data } }
+}

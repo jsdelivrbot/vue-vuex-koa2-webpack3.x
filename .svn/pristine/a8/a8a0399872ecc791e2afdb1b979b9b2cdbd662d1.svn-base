@@ -1,0 +1,1 @@
+module.exports = {"user":{"_id":"5b2a0092032e20224c3c9ce4","email":"419272450@qq.com","password":"f8aa3b2e578cb4a2c7c28c5627568627","portrait_code":"1004","create_date":"1529479314471","update_date":"1529479314471","__v":0,"region":"河北省石家庄市长安区","birth":"2010-12-31","sex":1,"nickname":"Jeffrey"},"_expire":1530353241296,"_maxAge":86400000};

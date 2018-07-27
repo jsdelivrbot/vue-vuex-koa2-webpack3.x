@@ -1,0 +1,49 @@
+var BaseDao = require('./BaseDao.js'),
+    models = require('../models/db.js'),
+    contactsModel = models.contactsModel,
+    userModel = models.user;
+
+var contactsDao = function () { };
+contactsDao.prototype = new BaseDao(contactsModel);
+
+contactsDao.getAllContacts = function (query, fileds) {
+
+    return new Promise((resolve, reject) => {
+
+        userModel.aggregate([
+            //条件
+            {
+                $match: query
+            },
+            //关联表
+            {
+                $lookup:
+                {
+                    from: "messages",
+                    localField: "_id",
+                    foreignField: "from_uid",
+                    as: "from_message"
+                }
+            },
+            //选择显示字段
+            {
+                $project: fileds
+            }
+        ]).exec(function (err, e) {
+            if (err) {
+                reject({
+                    "err": err,
+                    "data": e
+                });
+            } else {
+                resolve({
+                    "err": err,
+                    "data": e
+                });
+            }
+        })
+
+    });
+}
+
+module.exports = contactsDao;

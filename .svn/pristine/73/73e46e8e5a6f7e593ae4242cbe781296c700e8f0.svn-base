@@ -1,0 +1,80 @@
+function BaseDao(Model) {
+
+    this.model = Model;
+}
+
+BaseDao.prototype.create = function (doc) {
+    let _this = this;
+    return new Promise((resolve, reject) => {
+        _this.model.create(doc, function (err) {
+            resolve({
+                "err": err,
+                "data": null
+            });
+        });
+    })
+};
+
+BaseDao.prototype.getById = function (id, callback) {
+
+    this.model.findOne({ _id: id }, function (error, model) {
+        if (error) {
+            return callback(error, null);
+        }
+        return callback(null, model);
+    });
+};
+
+BaseDao.prototype.countByQuery = function (query, callback) {
+
+    let _this = this;
+    return new Promise((resolve, reject) => {
+        _this.model.count(query, function (err, count) {
+            resolve({
+                "err": err,
+                "data": count
+            });
+        });
+    });
+};
+
+BaseDao.prototype.getByQuery = function (query, fileds, opt, callback) {
+
+    let _this = this;
+    return new Promise((resolve, reject) => {
+        _this.model.find(query, fileds, opt, function (err, model) {
+            resolve({
+                "err": err,
+                "data": model
+            });
+        });
+    });
+
+    
+};
+
+BaseDao.prototype.getAll = function (callback) {
+
+    this.model.find({}, function (error, model) {
+        if (error) {
+            return callback(error, null);
+        }
+        return callback(null, model);
+    });
+};
+
+BaseDao.prototype.delete = function (query, callback) {
+
+    this.model.remove(query, function (error, model) {
+        return callback(error, null);
+    });
+};
+
+BaseDao.prototype.update = function (conditions, update, optsion, callback) {
+
+    this.model.update(conditions, update, optsion, function (error) {
+        return callback(error, null);
+    });
+};
+
+module.exports = BaseDao;

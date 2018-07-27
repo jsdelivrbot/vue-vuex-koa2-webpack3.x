@@ -1,0 +1,126 @@
+<template>
+  <div>
+    <router-view></router-view>
+    <mt-tabbar v-show="tabbarStatus" v-model="tabbar_selected" :fixed="true">
+      <mt-tab-item id="index">
+        <img slot="icon" :src="tabbar_selected == 'index' ? require('./images/icon-index-active.png') : require('./images/icon-index.png')"> 首页
+      </mt-tab-item>
+      <mt-tab-item id="message">
+        <img slot="icon" :src="tabbar_selected == 'message' ? require('./images/icon-message-active.png') : require('./images/icon-message.png')"> 消息
+        <i v-if="unreadMessageCount > 0">{{unreadMessageCount}}</i>
+      </mt-tab-item>
+      <mt-tab-item id="mine">
+        <img slot="icon" :src="tabbar_selected == 'mine' ? require('./images/icon-mine-active.png') : require('./images/icon-mine.png')"> 我的
+      </mt-tab-item>
+    </mt-tabbar>
+
+  </div>
+</template>
+<style lang="scss" scoped>
+.mint-tab-item {
+  padding: 10px 0 4px;
+  &.is-selected {
+    color: #008b8b;
+    background: none;
+  }
+}
+.mint-tab-item {
+  position: relative;
+  i {
+    position: absolute;
+    top: 0.3em;
+    left: 4.6rem;
+    background: red;
+    border-radius: 50rem;
+    color: #fff;
+    text-align: center;
+    display: block;
+    font-style: inherit;
+    font-size: 0.8rem;
+    height: 1.2rem;
+    width: 1.2rem;
+    line-height: 1.3rem;
+  }
+}
+</style>
+<script>
+
+import { mapGetters } from 'vuex'
+import { Tabbar, TabItem } from 'mint-ui';
+import { Toast, MessageBox } from 'mint-ui';
+import request from "@/utils/request"
+
+export default {
+  data: function () {
+    return {
+      tabbar_selected: 'index'//默认选中节点
+    }
+  },
+  computed: {
+    ...mapGetters(['tabbarStatus', 'unreadMessageCount', 'isReadable'])
+  },
+  methods: {
+  },
+  sockets: {
+    // 全局应用内检测服务端的消息推送
+    receiveMsg: function (o) {
+
+      let count = this.$store.getters.unreadMessageCount;
+      if (this.$route.path != "/chat") {
+        this.$store.commit("changeUnreadMessageCount", count + 1);
+      }
+    }
+  },
+  created() {
+
+    // 查询当前所有未读消息总数
+    request.post("/message/getAllUnreadCount").then(e => {
+
+      if (e.err) {
+        // Toast(e.err);
+      } else {
+        let result = e.result;
+        this.$store.commit("changeUnreadMessageCount", result);
+      }
+    }).catch(error => {
+      Toast(error);
+    });
+
+  },
+  watch: {
+
+    tabbar_selected: function (item, oldItem) {
+      this.$router.push('/' + item);
+    },
+
+    $route(to, from) {
+
+      // 当前路由
+      let path = to.path;
+
+      if (path == "/chat") {
+        this.$store.commit("changeTabbarStatus", false);// 底部Tabbar控制
+        this.$store.commit("changeReadable", true);// 消息是否为可读状态
+      } else {
+        this.$store.commit("changeTabbarStatus", true);// 底部Tabbar控制
+        this.$store.commit("changeReadable", false);// 消息是否为可读状态
+      }
+
+      // 所有页面组
+      let tabs = {
+        index: ["/", "/index", "/strategy"],//首页，攻略，游记，结伴，签证
+        message: ["/message", "/chat"],//消息
+        mine: ["/mine", "/datum"]//我的，修改资料
+      }
+
+      // 适配当前需要激活的页签
+      for (var key in tabs) {
+        if (tabs[key].some(record => path == record)) {
+          this.tabbar_selected = key;
+          return;
+        }
+      }
+    }
+  }
+}
+</script>

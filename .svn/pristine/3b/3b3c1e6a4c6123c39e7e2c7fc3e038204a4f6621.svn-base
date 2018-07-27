@@ -1,0 +1,10 @@
+<template>
+    <div>
+        ccccccccccccccccc
+    </div>
+</template>
+<style lang="scss" scoped>
+    div{
+        background: #666;
+    }
+</style>

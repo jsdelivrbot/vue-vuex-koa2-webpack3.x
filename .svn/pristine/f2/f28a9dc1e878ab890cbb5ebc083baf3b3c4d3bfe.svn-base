@@ -1,0 +1,35 @@
+<template>
+  <div>
+    个人中心
+  </div>
+</template>
+<style lang="scss" scoped>
+</style>
+<script>
+
+import { Toast, MessageBox } from 'mint-ui'
+import { getToken } from '@/utils/auth'
+import request from "@/utils/request"
+
+export default {
+  name: "carrousel",
+  data() {
+    return {
+    };
+  },
+  components: {
+  },
+  computed: {
+  },
+  mounted() {
+
+    request.post("/user/getUserInfo").then(result => {
+      console.log(result);
+    }).catch(error => {
+      console.log(error);
+    });
+  },
+  methods: {
+  }
+};
+</script>

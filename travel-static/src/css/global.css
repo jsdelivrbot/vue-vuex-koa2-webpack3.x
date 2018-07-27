@@ -1,0 +1,54 @@
+@import url("./viewport.scss");
+
+*,::before,::after{
+    margin:0;
+    padding:0;
+    -webkit-tap-highlight-color:transparent;/*清除移动端默认的点击高亮效果*/
+    -webkit-box-sizing:border-box;/*设置以边框开始计算宽度*/
+    box-sizing:border-box;
+}
+
+
+body{
+    font-size:1rem;
+    font-family:'PingFangSC-Light',Arial,Helvetica,sans-serif,"Hiragino Sans GB";/*设备默认字体*/
+    color:#333;
+    max-width: 26rem;
+    margin: 0 auto;
+}
+
+a{
+    color:#333;
+    text-decoration:none;
+}
+
+a:hover{
+    text-decoration:none;
+}
+
+ul,ol{
+    list-style:none;
+}
+
+input{
+    border:none;
+    outline:none;
+    -webkit-appearance:none;/*清除移动端默认的表单样式*/
+}
+
+.f_left{
+    float:left;
+}
+
+.f_right{
+    float:right;
+}
+
+.clearfix::before,.clearfix::after{
+    content:"";
+    height:0;
+    line-height:0;
+    display:block;
+    visibility:hidden;
+    clear:both;
+}

@@ -1,0 +1,54 @@
+const contactsDao = require('../daos/contactsDao')
+const messageDao = require('../daos/messageDao')
+const mongodb = require('mongodb')
+
+module.exports.getAllContacts = async (ctx, next) => {
+
+    let _id = ctx.session.user._id;
+
+    // 当前联系人用户列表
+    let uResult = await contactsDao.prototype.getByQuery(
+        { "_id": { $ne: mongodb.ObjectId(_id) } },
+        { "_id": 1, "email": 1, "nickname": 1, "portrait_img_src": 1, "sex": 1 }
+    ).then(e => {
+        return e;
+    });
+
+    let uData = uResult.data || [];
+
+    // 当前联系人消息列表
+    for (let [index, item] of uData.entries()) {
+
+        // 对话的消息列表
+        let mResult = await messageDao.prototype.getByQuery(
+            {
+                "$and": [
+                    { "from_uid": { $in: [mongodb.ObjectId(item._id), mongodb.ObjectId(_id)] } },
+                    { "to_uid": { $in: [mongodb.ObjectId(_id), mongodb.ObjectId(item._id)] } }
+                ]
+            }
+        ).then(e => {
+            return e;
+        });
+
+        let mData = mResult.data || [];
+
+        // 最后一条消息
+        uData[index].lastMsg = (function (mData) {
+            if (mData.length) {
+                return mData[mData.length - 1]["content"];
+            } else {
+                return "";
+            }
+        })(mData);
+
+        // 当前用户所有未读消息
+        let filterData = mData.filter(function (item) {
+            return item.status == 0;
+        });
+
+        uData[index].unread = filterData.length;
+    }
+
+    ctx.body = { "err": uResult.err, "result": { "contacts": uData } }
+}

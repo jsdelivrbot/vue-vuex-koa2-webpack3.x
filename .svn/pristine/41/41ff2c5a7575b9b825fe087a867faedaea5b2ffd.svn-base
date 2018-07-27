@@ -1,0 +1,9 @@
+const router = require('koa-router')()
+const userControl = require('../controllers/userControl');
+
+router.prefix('/api/user')
+    .post('/sendCode', userControl.sendCode)
+    .post('/register', userControl.register);
+
+module.exports = router
+

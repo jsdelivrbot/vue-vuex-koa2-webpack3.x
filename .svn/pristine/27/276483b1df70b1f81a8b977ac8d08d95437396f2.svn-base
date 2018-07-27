@@ -1,0 +1,81 @@
+const Koa = require('koa')
+const app = new Koa()
+const json = require('koa-json')
+const onerror = require('koa-onerror')
+const bodyparser = require('koa-bodyparser')
+const logger = require('koa-logger')
+const cors = require('koa2-cors')
+const session = require('koa-session');
+const static = require('koa-static');
+const path = require('path');
+const config = require('./config');
+const store = require('./store');//session仓库
+const socketServer = require('./server/socketServer');
+
+const index = require('./routes/index')
+
+onerror(app)
+
+/**
+ * 允许跨域
+ */
+app.use(cors({
+  origin: 'http://172.20.17.125:516',
+  exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
+  maxAge: 5,
+  credentials: true,
+  allowMethods: ['GET', 'PUT', 'POST', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
+}));
+
+app.use(bodyparser({
+  enableTypes: ['json', 'form', 'text']
+}))
+app.use(json())
+app.use(logger())
+
+app.use(async (ctx, next) => {
+  const start = new Date()
+  await next()
+  const ms = new Date() - start
+  console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
+})
+
+/**
+ * 静态资源
+ */
+app.use(static(path.resolve(__dirname, './static/')));
+
+
+
+
+/**
+ * session设置
+ */
+app.keys = ['hulixiao2018'];//用来加密cookie
+app.use(session({
+  key: config.sessionIdKey,   // cookie key (default is koa:sess)
+  maxAge: 24 * 60 * 60 * 1000,  // cookie的有效期，默认是一天
+  overwrite: true,  //是否可以overwrite    (默认default true)
+  httpOnly: true, // 是否可以通过javascript来修改，设成true会更加安全
+  signed: true,   // 签名默认true，涉及到cookie的安全性
+  rolling: false,  // 在每次请求时强行设置cookie，这将重置cookie过期时间（默认：false）
+  renew: false,  // (boolean) renew session when session is nearly expired,
+  store: store
+}, app));
+
+/**
+ * 装载路由
+ */
+app.use(index.routes(), index.allowedMethods())
+
+/**
+ * socket服务
+ */
+socketServer(app);
+
+app.on('error', (err, ctx) => {
+  console.error('server error', err, ctx)
+});
+
+module.exports = app

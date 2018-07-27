@@ -1,0 +1,14 @@
+var mongoose = require('mongoose'),
+    Schema = mongoose.Schema;
+
+var schema = new Schema({
+
+    'id': String, //id
+    'user_id': String,//用户id
+    'type': Number,//0：站内信，1:邮件，2：短信
+    'title': String, //标题
+    'content': String, //内容
+    'create_data': String //创建时间
+});
+
+mongoose.model('msg', schema);

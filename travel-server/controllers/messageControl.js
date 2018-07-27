@@ -1,0 +1,155 @@
+const mongodb = require('mongodb')
+const messageDao = require('../daos/messageDao')
+/**
+ * 获取当前所有未读消息数
+ * @param {*} ctx 
+ * @param {*} next 
+ */
+module.exports.getAllUnreadCount = async (ctx, next) => {
+
+    let _id = ctx.session.user._id;
+
+    let result = await messageDao.getAllUnreadCount({ "to_uid": { $eq: mongodb.ObjectId(_id) }, "status": 0 }).then(e => {
+        return e;
+    });
+
+    ctx.body = { "err": result.err, "result": result.data }
+}
+
+/**
+ * 更新消息状态
+ * @param {*} ctx 
+ * @param {*} next 
+ */
+module.exports.updateMessageByMid = async (ctx, next) => {
+
+    let body = ctx.request.body;
+
+    let result = await messageDao.prototype.update({ "_id": { $eq: mongodb.ObjectId(body._id) } }, { "status": 1 }, {}).then(e => {
+        return e;
+    });
+
+    ctx.body = { "err": result.err, "result": result.data }
+}
+
+/**
+ * 获取当前所有未读消息数
+ * @param {*} ctx 
+ * @param {*} next 
+ */
+module.exports.updateUnreadMessage = async (ctx, next) => {
+
+    let _id = ctx.session.user._id,
+        from_uid = ctx.request.body.from_uid;
+
+    let result = await messageDao.prototype.update({ "from_uid": { $eq: mongodb.ObjectId(from_uid) }, "to_uid": { $eq: mongodb.ObjectId(_id) } }, { "status": 1 }, { "multi": true }).then(e => {
+        return e;
+    });
+
+    ctx.body = { "err": result.err, "result": result.data.nModified }
+}
+
+/**
+ * 获取最近信息记录
+ * @param {*} ctx 
+ * @param {*} next 
+ */
+module.exports.getHistoryMessage = async (ctx, next) => {
+
+    let _id = ctx.session.user._id,
+        from_uid = ctx.request.body.from_uid;
+
+    let result = await messageDao.getRelationUser(
+        {
+            "$and": [
+                { "from_uid": { $in: [mongodb.ObjectId(from_uid), mongodb.ObjectId(_id)] } },
+                { "to_uid": { $in: [mongodb.ObjectId(_id), mongodb.ObjectId(from_uid)] } }
+            ]
+        },
+        {
+            "_id": 0,
+            "from_uid": 1,
+            "content": 1,
+            "create_date": 1,
+            "to_user.email": 1,
+            "to_user.nickname": 1,
+            "to_user.portrait_img_src": 1,
+            "from_user.email": 1,
+            "from_user.nickname": 1,
+            "from_user.portrait_img_src": 1
+        },
+        {
+            "sort": { "create_date": -1 },
+            "skip": 0,
+            "limit": 5
+        }).then(e => {
+            return e;
+        });
+
+    let data = result.data.reverse();
+
+    for (let index in data) {
+
+        let item = data[index];
+
+        if (item.from_uid != _id) {
+            data[index]['from'] = 'other';
+        } else {
+            data[index]['from'] = 'my';
+        }
+    }
+
+    ctx.body = { "err": result.err, "result": data }
+}
+
+/**
+ * 获取当前用户来源于某用户的未读消息列表
+ * @param {*} ctx 
+ * @param {*} next 
+ */
+module.exports.getAllUnreadList = async (ctx, next) => {
+
+    let body = ctx.request.body;
+    let _id = ctx.session.user._id;
+
+    let result = await messageDao.getRelationUser(
+        {
+            "to_uid": { $eq: mongodb.ObjectId(_id) },
+            "from_uid": { $eq: mongodb.ObjectId(body.from_uid) },
+            "status": 0
+        },
+        {
+            "_id": 0,
+            "from_uid": 1,
+            "content": 1,
+            "create_date": 1,
+            "to_user.email": 1,
+            "to_user.nickname": 1,
+            "to_user.portrait_img_src": 1,
+            "from_user.email": 1,
+            "from_user.nickname": 1,
+            "from_user.portrait_img_src": 1
+        },
+        {
+            "sort": { "create_date": -1 },
+            "skip": 0,
+            "limit": 20
+        }).then(e => {
+            return e;
+        });
+
+    let data = result.data.reverse();
+
+    for (let index in data) {
+
+        let item = data[index];
+
+        if (item.from_uid != _id) {
+            data[index]['from'] = 'other';
+        } else {
+            data[index]['from'] = 'my';
+        }
+    }
+
+    ctx.body = { "err": result.err, "result": data }
+}

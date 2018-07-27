@@ -1,0 +1,24 @@
+const router = require('koa-router')()
+const mailServer = require('../server/mailServer')
+
+router.prefix('/api/platform')
+
+router.post('/sendCode', function (ctx, next) {
+
+    let body = ctx.request.body;
+
+    let code = Math.floor(Math.random() * 10000);
+
+    mailServer.send({
+        to: body.email, // 接受邮箱
+        subject: '【狐狸笑】注册验证码', // 标题
+        html: `您的验证码是：<span style="color:red;font-size:16px;">${code}</span>，有效时间：10分钟` // 内容
+    }).then(e => {
+        
+        console.log(e);
+    });
+
+    ctx.body = {"data" : {"status" : 1}}
+})
+
+module.exports = router

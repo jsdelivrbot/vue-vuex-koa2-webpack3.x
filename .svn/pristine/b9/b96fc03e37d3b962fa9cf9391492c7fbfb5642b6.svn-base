@@ -1,0 +1,39 @@
+import "./css/global.css";//全局样式
+
+import Vue from "vue"
+import VueRouter from "vue-router"
+import App from "./app.vue"
+import routes from "./routes"
+import components from './components' //加载公共组件
+import store from "./sotre"
+// import mock from "./mock"//模拟数据
+
+/**
+ * 全局路由注册
+ */
+Vue.use(VueRouter);
+const router = new VueRouter(routes);
+
+/**
+ * 全局组件注册
+ */
+Object.keys(components).forEach((key) => {
+    var name = key.replace(/(\w)/, (v) => v.toUpperCase()); //首字母大写
+    Vue.component(`${name}`, components[key])
+});
+
+/**
+ * UI组件注册
+ */
+import MintUI from 'mint-ui';
+Vue.use(MintUI);
+
+/**
+ * 创建实例
+ */
+new Vue({
+    el: "#app",
+    store,
+    router: router,
+    render: h => h(App)
+})

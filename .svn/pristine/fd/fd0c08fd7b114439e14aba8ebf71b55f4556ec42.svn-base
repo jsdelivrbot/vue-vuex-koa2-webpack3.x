@@ -1,0 +1,145 @@
+const jwt = require('jsonwebtoken')
+const util = require('util')
+const userDao = require('../daos/userDao')
+const vcodeDao = require('../daos/vcodeDao')
+const mailServer = require('../server/mailServer')
+
+/**
+ * 发送注册验证码
+ */
+module.exports.sendCode = async (ctx, next) => {
+
+    let body = ctx.request.body;
+
+    // 验证邮箱|手机号是否已经注册
+    let uResult = await userDao.prototype.countByQuery({ "email": body.email }).then(e => {
+        return e;
+    });
+
+    if (uResult.data != 0) {
+        ctx.body = { "err": uResult.err, "result": { "count": false } }
+        return;
+    }
+
+    // 发送验证码
+    let code = Math.floor(Math.random() * 9000) + 1000;
+    let vResult = await vcodeDao.prototype.create({ "relation_id": body.email, "code": code, "create_date": new Date().getTime() }).then(e => {
+        return e;
+    });
+
+    let status = await mailServer.send({
+        to: body.email, // 接受邮箱
+        subject: '【狐狸笑】注册验证码', // 标题
+        html: `您的验证码是：<span style="color:red;font-size:16px;">${code}</span>，有效时间：10分钟` // 内容
+    }).then(e => {
+        return e;
+    });
+
+    ctx.body = { "err": vResult.err, "result": { "status": status } }
+
+}
+
+/**
+ * 用户注册
+ * @param {*} ctx 
+ * @param {*} next 
+ */
+module.exports.register = async (ctx, next) => {
+
+    let body = ctx.request.body;
+
+    // 验证验证码是否输入错误
+    let time = new Date(new Date().getTime() - 1000 * 60 * 5).getTime();
+    let vResult = await vcodeDao.prototype.getByQuery({ "relation_id": body.email, "create_date": { $gte: time } }, {}, { sort: { "create_date": -1 }, skip: 0, limit: 1 }).then(e => {
+        return e;
+    });
+    let arr = vResult.data;
+    if (arr.length && arr[0]["code"] != body.validateCode) {
+        ctx.body = { "err": vResult.err, "result": { "vcode": false } }
+        return;
+    }
+
+    // 用户注册
+    let uResult = await userDao.prototype.create({ "email": body.email, "password": body.password, "create_date": new Date().getTime(), "update_date": new Date().getTime() }).then(e => {
+        return e;
+    });
+
+    ctx.body = { "err": uResult.err, "result": { "count": uResult.err ? false : true } }
+}
+
+/**
+ * 用户登录
+ * @param {*} ctx 
+ * @param {*} next 
+ */
+module.exports.login = async (ctx, next) => {
+
+    let body = ctx.request.body,
+        uResult;
+
+    // 查询邮箱是否注册
+    if (body.email) {
+        uResult = await userDao.prototype.getByQuery({ "email": body.email }, {}, {}).then(e => {
+            return e;
+        });
+        if (!uResult.data.length) {
+            ctx.body = { "err": uResult.err, "result": { "status": 1 } }
+            return;
+        }
+    }
+
+    // 查询手机是否注册
+    if (body.phone) {
+        uResult = await userDao.prototype.getByQuery({ "phone": body.phone }, {}, {}).then(e => {
+            return e;
+        });
+        if (!uResult.data.length) {
+            ctx.body = { "err": uResult.err, "result": { "status": 2 } }
+            return;
+        }
+    }
+
+    // 登录
+    uResult = await userDao.prototype.getByQuery({ "email": body.email, "password": body.password }, { "_id": 0, "email": 1, "phone": 1, "name": 1, "sex": 1, "age": 1, "occupation": 1, "address": 1 }, {}).then(e => {
+        return e;
+    });
+
+    // 密码不匹配
+    if (!uResult.data.length) {
+        ctx.body = { "err": uResult.err, "result": { "status": 3 } }
+        return;
+    }
+
+    // 当前用户
+    let user = uResult.data[0];
+
+    // 存储当前用户信息到session中
+    ctx.session.user = user;
+
+    // 生成token
+    let token = jwt.sign(
+        { name: user.emial }, // 有效载荷，一般为用户唯一标识
+        "hulixiao-token",// 包含HMAC算法的密钥或RSA和ECDSA的PEM编码私钥的string或buffer，一般为签名
+        {
+            algorithm: 'HS256',//加密算法
+            expiresIn: '1h'//过期时间
+        }
+    )
+
+    // 登录成功
+    ctx.body = { "err": uResult.err, "result": { "token": token } }
+    return;
+}
+
+/**
+ * 获取当前登录用户信息
+ * @param {*} ctx 
+ * @param {*} next 
+ */
+module.exports.getUserInfo = async (ctx, next) => {
+
+    let token = ctx.header.authorization;
+    let payload = await util.promisify(jwt.verify)(token.split(' ')[1], 'hulixiao-token');//解密
+    
+    ctx.body = payload
+}

@@ -1,0 +1,70 @@
+const fs = require("fs");
+const path = require("path");
+const webpack = require("webpack");
+const merge = require("webpack-merge");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const bodyParser = require('body-parser');
+const baseWebpackConfig = require("./webpack.base.config");
+const WebpackDevServer = require('webpack-dev-server');
+const config = require('../config');
+
+module.exports = merge(baseWebpackConfig, {
+    devServer: {
+        hot: true, // 即修改或模块后，保存会自动更新，页面不用刷新呈现最新的效果。
+        host: config.dev.host, // 主机地址，默认localhost
+        port: config.dev.port, // 端口，默认8080
+        historyApiFallback: true,// 如果为 true ，页面出错不会弹出 404 页面
+        quiet: true,// true，则终端输出的只有初始启动信息。 webpack 的警告和错误是不输出到终端的。
+        open: true, // 自动打开浏览器
+        publicPath: config.dev.outputPublicPath, //配置了 publicPath后， url = '主机名' + 'publicPath配置的' +'原来的url.path'。这个其实与 output.publicPath 用法大同小异。
+        before: function (app) {
+            app.use(bodyParser.urlencoded({ extended: false }));
+            app.all(/\/api\/(.*)/, function (req, res) {
+                let name = path.join(__dirname, '../src/mock/', req.path.replace(/\/+/g, '_').substring(5) + '.json');
+                if (!fs.existsSync(name)) {
+                    return res.sendStatus(404);
+                }
+                res.set('Content-Type', 'application/json');
+                res.send(fs.readFileSync(name, { encoding: 'utf8' }));
+            });
+
+        }
+    },
+    output: {
+        path: config.prod.outputPath,
+        publicPath: config.prod.outputPublicPath //output.publicPath 是作用于 js, css, img 。而 devServer.publicPath 则作用于请求路径上的。
+    },
+    module: {
+        rules:
+            [
+                {
+                    test: /\.vue$/,
+                    use: ["vue-loader"]
+                }, {
+                    test: /\.css$/,
+                    use: ['vue-style-loader', 'css-loader', 'postcss-loader']
+                },
+                {
+                    test: /\.styl$/,
+                    use: ['vue-style-loader', 'css-loader', 'postcss-loader', 'stylus-loader']
+                },
+                {
+                    test: /\.less$/,
+                    use: ['vue-style-loader', 'css-loader', 'postcss-loader', 'less-loader']
+                },
+                {
+                    test: /\.scss$/,
+                    use: ['vue-style-loader', 'css-loader', 'postcss-loader', 'sass-loader']
+                }
+            ]
+    },
+    plugins: [
+
+        new webpack.HotModuleReplacementPlugin(),
+
+        new HtmlWebpackPlugin({
+            filename: "index.html",//相对于Webpack配置项output.path
+            template: "index.tpl.html"//相对于Webpack编译时的上下文目录，一般就是项目根目录
+        })
+    ]
+});

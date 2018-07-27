@@ -1,0 +1,22 @@
+var mongoose = require('mongoose'),
+    Schema = mongoose.Schema;
+
+var schema = new Schema({
+
+    'id': String, //id
+    'email': String,//验证码
+    'phone': Number,//手机号
+    'password': String,//登录密码
+
+    'nickname': String, //姓名
+    'sex': Number, //性别 1:男，2：女，3：保密
+    'birth': String, //出生日期
+    'region': String,//所在地
+    'portrait_code': String,//用户头像code
+    'portrait_img_src': String,//头像图片地址
+
+    'create_date': String,//创建时间
+    'update_date': String//创建时间
+});
+
+mongoose.model('user', schema);

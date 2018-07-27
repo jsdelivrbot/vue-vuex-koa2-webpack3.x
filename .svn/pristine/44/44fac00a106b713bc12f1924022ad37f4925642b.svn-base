@@ -1,0 +1,121 @@
+<template>
+    <div>
+        <ul>
+            <li @click="chatMsg('5b2b5bd9871544132c7cabb0')">
+                <div class="portrait"><img src="./images/single.svg" /></div>
+                <div class="info">
+                    <span>刘德华</span>
+                    <p>晚上一起吃饭...</p>
+                </div>
+            </li>
+            <li>
+                <div class="portrait"><img src="./images/single-active.svg" /></div>
+                <div class="info">
+                    <span>刘德华</span>
+                    <p>晚上一起吃饭...</p>
+                </div>
+            </li>
+            <li>
+                <div class="portrait"><img src="./images/group.svg" /></div>
+                <div class="info">
+                    <span>刘德华</span>
+                    <p>晚上一起吃饭...</p>
+                </div>
+            </li>
+            <li>
+                <div class="portrait"><img src="./images/group-active.svg" /></div>
+                <div class="info">
+                    <span>刘德华</span>
+                    <p>晚上一起吃饭...</p>
+                </div>
+            </li>
+            <li>
+                <div class="portrait"><img src="./images/machine.svg" /></div>
+                <div class="info">
+                    <span>系统消息</span>
+                    <p>Could someone maybe provide an example of a package sent to the activator that did work, both url, header and body and I should be able to generate the exact same type of put request as a start</p>
+                </div>
+            </li>
+            <li>
+                <div class="portrait"><img src="./images/machine-active.svg" /></div>
+                <div class="info">
+                    <span>系统消息</span>
+                    <p>恭喜你，注册成功!</p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</template>
+<style lang="scss" scoped>
+ul {
+  li {
+    height: 3.5rem;
+    overflow: hidden;
+    border-bottom: 1px solid #efefef;
+    box-shadow: 0px 0px 30px #efefef;
+    margin: 0.5rem 0;
+    .portrait {
+      float: left;
+      width: 15%;
+      height: 3.5rem;
+      text-align: center;
+      img {
+        width: 65%;
+        margin-top: 0.5rem;
+      }
+    }
+    .info {
+      float: left;
+      overflow: hidden;
+      height: 100%;
+      width: 85%;
+      padding: 0.5rem 0;
+      span {
+        display: block;
+        height: 1.5rem;
+        line-height: 1.5rem;
+        overflow: hidden;
+      }
+      p {
+        display: block;
+        height: 1rem;
+        line-height: 1rem;
+        color: #666;
+        font-size: 0.8rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 95%;
+      }
+    }
+  }
+}
+</style>
+
+<script>
+
+import { Navbar, TabItem } from 'mint-ui';
+
+export default {
+    data() {
+        return {
+            selected: "artificial",
+            message: ''
+        }
+    },
+    sockets: {
+        // 接收广播
+        broadcast: function (e) {
+
+            console.log(e);
+        }
+    },
+    methods: {
+
+        chatMsg: function (uid) {
+
+            this.$router.push("/chat");
+        }
+    }
+}
+
+</script>

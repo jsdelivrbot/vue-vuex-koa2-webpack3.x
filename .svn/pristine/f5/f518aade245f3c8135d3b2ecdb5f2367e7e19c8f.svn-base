@@ -1,0 +1,35 @@
+const nodemailer = require('nodemailer')
+
+const transporter = nodemailer.createTransport({
+    service: "163",
+    port: 465,
+    secureConnection: true,
+    auth: {
+        user: "cc_byland@163.com",
+        pass: "jixiaojiao0516"
+    }
+})
+
+let mailOptions = {
+    from: "狐狸笑 <cc_byland@163.com>" // 发送邮箱
+}
+
+module.exports.send = async function (options) {
+
+    transporter.sendMail(Object.assign(mailOptions, options), async (error, msg) => {
+
+        if (error) {
+
+            console.log(error);
+            return { status: 0 };
+        } else {
+
+            console.log("==================" + msg.accepted);
+            return { status: 1 };
+        }
+
+        return 11111111111111111;
+    });
+
+    // return 2222222222222;
+}

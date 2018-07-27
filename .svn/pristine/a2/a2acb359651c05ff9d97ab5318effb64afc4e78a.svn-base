@@ -1,0 +1,7 @@
+const router = require('koa-router')()
+const platformControl = require('../controllers/platform');
+
+router.prefix('/api/platform')
+    .post('/sendCode', platformControl.sendCode);
+
+module.exports = router

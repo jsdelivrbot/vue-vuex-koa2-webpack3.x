@@ -1,0 +1,152 @@
+const socketio = require('socket.io');
+const http = require('http');
+const log = require('../utils/logUtil.js');
+const ipUtil = require('../utils/ipUtil');
+const cookieUtil = require('../utils/cookieUtil');
+const config = require('../config');
+const store = require('../store');//session容器
+const mongodb = require('mongodb')
+const messageDao = require('../daos/messageDao');
+const contactsDao = require('../daos/contactsDao');
+
+module.exports = function (app) {
+
+    let server = http.createServer(app.callback());
+    let io = socketio(server);
+    server.listen(config.socketPort);
+
+    log.success('消息服务连接成功...');
+
+    // 保存所有客户端
+    let clients = [];
+
+    /**
+     * 监听客户端连接
+     */
+    io.on('connection', function (socket) {
+
+        let cookie = socket.request.headers.cookie,
+            handshake = socket.handshake,
+            sessionId = cookieUtil.getCookie(cookie, config.sessionIdKey),
+            user = (store.get(sessionId) || {})["user"] || {};//当前用户对象
+
+        // 当前socketId
+        var socketId = socket.id;
+
+        // 保存当前socket
+        clients[clients.length] = {
+            socketId: socketId,
+            userId: user["_id"]
+        };
+
+        /**
+         * 客户端加入
+         */
+        socket.on('join', function () {
+
+            console.log("=====客户端连接：" + socketId);
+
+            // 广播所有联系人-同步所有当前在线联系人给所有客户端
+            io.sockets.emit('synchroContacts', clients);
+        });
+
+        /**
+         * 客户端断开
+         */
+        socket.on('disconnect', function () {
+            closeClient();
+        });
+        socket.on('connect_error', function () {
+            closeClient();
+        });
+        socket.on('connect_timeout', function () {
+            closeClient();
+        });
+
+        /**
+         * 客户端发送消息
+         */
+        socket.on('sendMsg', async function (o) {
+
+            console.log("=====客户端发送消息：" + o.msg);
+
+            let socket = null;
+
+            // 获取记录中的socket
+            if (o.toSocketId) {
+                socket = io.sockets.sockets[o.toSocketId];
+            }
+
+            // 用户存在重连，则获取当前最新的socket
+            if (!socket && o.toUserId) {
+                for (let client of clients) {
+                    if (client.userId == o.toUserId) {
+                        socket = io.sockets.sockets[client.socketId];
+                        break;
+                    }
+                }
+            }
+
+            let dateTime = new Date().getTime();
+
+            // 消息入库 - 以接收者为中心的信息存储
+            let mResult = {};
+            if (o.toUserId) {
+
+                mResult = await messageDao.addMessage({ "to_uid": o.toUserId, "from_uid": user["_id"], "type": 0, "status": 0, "content": o.msg, "create_date": dateTime }).then(e => {
+                    return e;
+                });
+
+                contactsDao.prototype.update(
+                    {
+                        "$and": [
+                            { "uid": { $in: [mongodb.ObjectId(user["_id"]), mongodb.ObjectId(o.toUserId)] } },
+                            { "relation_uid": { $in: [mongodb.ObjectId(o.toUserId), mongodb.ObjectId(user["_id"])] } }
+                        ]
+                    },
+                    { "last_touch_date": dateTime, "last_touch_content": o.msg }
+                ).then(e => {
+                    return e;
+                });
+            }
+
+            // 目标在线
+            if (socket) {
+                socket.emit("receiveMsg", {
+                    from: o.toUserId ? 'other' : 'my',//来源对象
+                    from_user: user,//发送用户
+                    msgId: mResult.data && mResult.data._id,//消息ID
+                    content: o.msg,//消息
+                    create_date: dateTime//发送时间
+                });
+            }
+        });
+
+        /**
+         * 客户端断开
+         */
+        function closeClient() {
+
+            console.log("=====客户端断开：" + socketId);
+
+            // 剔除当前socket
+            for (let [index, client] of clients.entries()) {
+                if (client["socketId"] == socketId) {
+                    clients.splice(index, 1);
+                }
+            }
+
+            // 广播所有用户
+            io.sockets.emit('synchroContacts', clients);
+        }
+
+        // 获取当前客户端地址位置信息
+        ipUtil.getIpInfo(handshake.address.substring(7), function (err, result) {
+            if (err) {
+                log.error(err);
+            } else {
+                let region = result.data;
+            }
+        });
+    });
+}

@@ -1,0 +1,61 @@
+<template>
+  <div>
+    <router-view></router-view>
+    <mt-tabbar v-model="tabbar_selected" :fixed="true">
+      <mt-tab-item id="index">
+        <img slot="icon" :src="tabbar_selected == 'index' ? require('./images/icon-index-active.png') : require('./images/icon-index.png')"> 首页
+      </mt-tab-item>
+      <mt-tab-item id="message">
+        <img slot="icon" :src="tabbar_selected == 'message' ? require('./images/icon-message-active.png') : require('./images/icon-message.png')"> 消息
+      </mt-tab-item>
+      <mt-tab-item id="mine">
+        <img slot="icon" :src="tabbar_selected == 'mine' ? require('./images/icon-mine-active.png') : require('./images/icon-mine.png')"> 我的
+      </mt-tab-item>
+    </mt-tabbar>
+  </div>
+</template>
+<style lang="scss" scoped>
+.mint-tab-item {
+  &.is-selected {
+    color: #008b8b;
+    background: none;
+  }
+}
+</style>
+<script>
+
+import { Tabbar, TabItem } from 'mint-ui';
+
+export default {
+  data: function () {
+    return {
+      tabbar_selected: 'index'//默认选中节点
+    }
+  },
+  watch: {
+    tabbar_selected: function (item, oldItem) {
+      this.$router.push('/' + item);
+    },
+    $route(to, from) {
+
+      // 当前路由
+      let path = to.path;
+
+      // 所有页面组
+      let tabs = {
+        index: ["/", "/index", "/strategy"],//首页，攻略，游记，结伴，签证
+        message: ["/message"],//消息
+        mine: ["/mine", "/datum"]//我的，修改资料
+      }
+
+      // 适配当前需要激活的页签
+      for (var key in tabs) {
+        if (tabs[key].some(record => path == record)) {
+          this.tabbar_selected = key;
+          return;
+        }
+      }
+    }
+  }
+}
+</script>

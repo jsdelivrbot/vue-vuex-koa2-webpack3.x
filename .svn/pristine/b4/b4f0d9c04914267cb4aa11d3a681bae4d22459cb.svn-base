@@ -1,0 +1,1 @@
+export const changeIsLogin = ({commit}, e) => commit("changeIsLogin", e);

@@ -1,0 +1,12 @@
+//读Cookie
+module.exports.getCookie = (cookies = "", name) => {
+
+    var arrStr = cookies.split("; ");
+    for (var i = 0; i < arrStr.length; i++) {
+        var temp = arrStr[i].split("=");
+        if (temp[0] == name) {
+            return unescape(temp[1]);
+        }
+    }
+    return "";
+}

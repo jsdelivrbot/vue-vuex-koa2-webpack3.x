@@ -1,0 +1,196 @@
+<template>
+    <div>
+        <ul>
+            <li v-for="(item, index) in contacts" :key="index" @click="singleChat(item.user._id, item.user.nickname)" v-bind:class="{'active' : item.isActive}">
+                <div class="portrait">
+                    <img :src="item.user.portrait_img_src" />
+                    <i v-if="item.unread && item.unread > 0">{{item.unread}}</i>
+                </div>
+                <div class="info">
+                    <span>{{item.user.nickname || "无名氏"}} - [{{item.user.email}}]</span>
+                    <div class="last_touch">
+                        <p>{{item.last_touch_content}}</p>
+                        <label>[{{item.last_touch_date | dateformat}}]</label>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</template>
+<style lang="scss" scoped>
+ul {
+  li {
+    height: 4rem;
+    overflow: hidden;
+    border-bottom: 1px solid #efefef;
+    box-shadow: 0px 0px 30px #efefef;
+    margin: 0.5rem 0;
+    &.active {
+      .info {
+        color: #008b8b;
+      }
+    }
+    .portrait {
+      float: left;
+      width: 15%;
+      height: 4rem;
+      text-align: center;
+      position: relative;
+      img {
+        max-width: 65%;
+        max-height: 65%;
+        margin-top: 0.8rem;
+      }
+      i {
+        position: absolute;
+        top: 0.6em;
+        left: 2.5rem;
+        background: red;
+        border-radius: 50rem;
+        color: #fff;
+        text-align: center;
+        display: block;
+        font-style: inherit;
+        font-size: 0.8rem;
+        height: 1rem;
+        width: 1rem;
+        line-height: 1.1rem;
+      }
+    }
+    .info {
+      float: left;
+      overflow: hidden;
+      height: 100%;
+      width: 79%;
+      margin-left: 1%;
+      padding: 0.6rem 0 0.4rem;
+      span {
+        display: block;
+        height: 1.5rem;
+        line-height: 1.5rem;
+        overflow: hidden;
+      }
+      .last_touch {
+        height: 1.5rem;
+        line-height: 1.5rem;
+        color: #666;
+        font-size: 0.8rem;
+        p {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          float: left;
+          max-width: 80%;
+        }
+        label {
+          float: right;
+        }
+      }
+    }
+  }
+}
+</style>
+
+<script>
+import Vue from 'vue';
+import { Toast, MessageBox } from 'mint-ui';
+import request from "@/utils/request"
+export default {
+    data() {
+        return {
+            contacts: [],//联系人列表
+            onlineContacts: [],//已上线联系人列表
+            selected: "artificial",
+            message: ''
+        }
+    },
+    sockets: {
+        // 监听服务器同步的客户端列表
+        synchroContacts: function (clients) {
+            this.onlineContacts = clients;
+        },
+        // 全局应用内检测服务端的消息推送
+        receiveMsg: function (o) {
+
+            for (let [index, item] of this.contacts.entries()) {
+
+                if (o.from_user["_id"] == item["user"]["_id"]) {
+
+                    let unread = item["unread"] || 0;
+
+                    this.$set(
+                        this.contacts,
+                        index,
+                        Object.assign(
+                            this.contacts[index],
+                            { "unread": unread + 1, "last_touch_content": o.content, "last_touch_date": o.create_date }
+                        )
+                    );
+                }
+            }
+        }
+    },
+    watch: {
+        /**
+         * 根据在线客户端列表驱动所有客户端在线状态
+         */
+        onlineContacts: function (onlineList) {
+
+            // 当前用户所有联系人列表
+            for (let [index, val] of this.contacts.entries()) {
+
+                //当前用户所有在线的联系人列表
+                let flag = false,
+                    socketId = "";
+
+                for (let client of onlineList) {
+
+                    if (client["userId"] == val.user._id) {
+                        flag = true;
+                        socketId = client["socketId"];
+                        break;
+                    }
+                }
+
+                if (flag) {
+                    Vue.set(this.contacts, index, Object.assign(this.contacts[index], { isActive: true, socketId: socketId }))
+                } else {
+                    Vue.set(this.contacts, index, Object.assign(this.contacts[index], { isActive: false, socketId: "" }))
+                }
+            }
+        },
+        contacts: function (list) {
+        }
+    },
+    created() {
+
+        // 加载最近联系人列表
+        request.post("/contacts/getAllContacts", this.loginForm).then(e => {
+
+            if (e.err) {
+                Toast(e.err);
+            } else {
+                let result = e.result;
+                this.contacts = result.contacts;
+                // 通知服务器，当前客户端已上线
+                this.$socket.emit('join');
+            }
+        }).catch(error => {
+            Toast(error);
+        });
+    },
+    methods: {
+        // 单聊某一位用户
+        singleChat: function (userId, nickname) {
+
+            this.$router.push({
+                path: '/chat',
+                query: {
+                    userId: userId,
+                    nickname: nickname
+                }
+            });
+        }
+    }
+}
+
+</script>

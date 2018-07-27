@@ -1,0 +1,1 @@
+module.exports = {"user":{"_id":"5b3f0abf2a66d207401c443a","email":"cc_byland@163.com","password":"e10adc3949ba59abbe56e057f20f883e","portrait_code":"1001","create_date":"1530858175823","update_date":"1530858175823","__v":0},"_expire":1530944648298,"_maxAge":86400000};

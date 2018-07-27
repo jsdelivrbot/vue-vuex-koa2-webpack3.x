@@ -1,0 +1,82 @@
+{
+  "_from": "koa-socket-session",
+  "_id": "koa-socket-session@1.2.0",
+  "_inBundle": false,
+  "_integrity": "sha1-9gy/fO3DSYE4HcOe7sO9YLQVVVI=",
+  "_location": "/koa-socket-session",
+  "_phantomChildren": {
+    "depd": "1.1.2",
+    "keygrip": "1.0.2"
+  },
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "koa-socket-session",
+    "name": "koa-socket-session",
+    "escapedName": "koa-socket-session",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#DEV:/",
+    "#USER"
+  ],
+  "_resolved": "https://registry.npmjs.org/koa-socket-session/-/koa-socket-session-1.2.0.tgz",
+  "_shasum": "f60cbf7cedc34981381dc39eeec3bd60b4155552",
+  "_spec": "koa-socket-session",
+  "_where": "E:\\codes\\ue_task\\travel\\travel-server",
+  "author": {
+    "name": "LnsooXD",
+    "email": "lnsooxd@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/LnsooXD/koa-socket-session/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "accepts": "^1.3.3",
+    "cookies": "^0.6.2",
+    "debug": "^2.6.6",
+    "koa-socket.io": "^1.1.1",
+    "not-type-of": "^1.0.1"
+  },
+  "deprecated": false,
+  "description": "Middleware for koa-socket session support",
+  "devDependencies": {
+    "koa": "^2.2.0",
+    "koa-session": "^5.0.0",
+    "koa-socket.io": "^1.0.3",
+    "koa-static": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=7.6"
+  },
+  "files": [
+    "LICENSE",
+    "README.md",
+    "lib"
+  ],
+  "homepage": "https://github.com/LnsooXD/koa-socket-session#readme",
+  "keywords": [
+    "session",
+    "cookie",
+    "koa",
+    "koa v2",
+    "socket.io",
+    "web sockets",
+    "websocket",
+    "koa-socket"
+  ],
+  "license": "MIT",
+  "main": "lib",
+  "name": "koa-socket-session",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LnsooXD/koa-socket-session.git"
+  },
+  "scripts": {
+    "example": "cd example && DEBUG=koa-socket* node ."
+  },
+  "version": "1.2.0"
+}

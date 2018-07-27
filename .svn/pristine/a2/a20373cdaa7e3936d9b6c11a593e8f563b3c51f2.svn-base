@@ -1,0 +1,25 @@
+const router = require('koa-router')();
+const platform = require('./platform');
+const userRouter = require('./user');
+
+router.get('/', async (ctx, next) => {
+  await ctx.render('index', {
+    title: 'Hello Koa 2!'
+  })
+})
+
+router.get('/string', async (ctx, next) => {
+  ctx.body = 'koa2 string'
+})
+
+router.get('/json', async (ctx, next) => {
+  ctx.body = {
+    title: 'koa2 json'
+  }
+})
+
+// 装载路由
+router.use(platform.routes(), platform.allowedMethods())
+router.use(userRouter.routes(), userRouter.allowedMethods())
+
+module.exports = router

@@ -1,0 +1,217 @@
+<template>
+    <div>
+        <ul>
+            <li v-for="(item, index) in contacts" :key="index" @click="singleChat(item._id, item.nickname)" v-bind:class="{'active' : item.isActive}">
+                <div class="portrait">
+                    <img :src="item.isActive ? require('./images/single-active.svg') : require('./images/single.svg')" />
+                    <i v-if="item.unread && item.unread > 0">{{item.unread}}</i>
+                </div>
+                <div class="info">
+                    <span>{{item.nickname || "无名氏"}} - [{{item.email}}]</span>
+                    <p>{{"暂无会话内容"}}</p>
+                </div>
+            </li>
+            <!-- <li>
+                <div class="portrait"><img src="./images/single-active.svg" /></div>
+                <div class="info">
+                    <span>刘德华</span>
+                    <p>晚上一起吃饭...</p>
+                </div>
+            </li>
+            <li>
+                <div class="portrait"><img src="./images/group.svg" /></div>
+                <div class="info">
+                    <span>刘德华</span>
+                    <p>晚上一起吃饭...</p>
+                </div>
+            </li>
+            <li>
+                <div class="portrait"><img src="./images/group-active.svg" /></div>
+                <div class="info">
+                    <span>刘德华</span>
+                    <p>晚上一起吃饭...</p>
+                </div>
+            </li>
+            <li>
+                <div class="portrait"><img src="./images/machine.svg" /></div>
+                <div class="info">
+                    <span>系统消息</span>
+                    <p>Could someone maybe provide an example of a package sent to the activator that did work, both url, header and body and I should be able to generate the exact same type of put request as a start</p>
+                </div>
+            </li>
+            <li>
+                <div class="portrait"><img src="./images/machine-active.svg" /></div>
+                <div class="info">
+                    <span>系统消息</span>
+                    <p>恭喜你，注册成功!</p>
+                </div>
+            </li> -->
+        </ul>
+    </div>
+</template>
+<style lang="scss" scoped>
+ul {
+  li {
+    height: 4rem;
+    overflow: hidden;
+    border-bottom: 1px solid #efefef;
+    box-shadow: 0px 0px 30px #efefef;
+    margin: 0.5rem 0;
+    &.active {
+      .info {
+        color: #008b8b;
+      }
+    }
+    .portrait {
+      float: left;
+      width: 15%;
+      height: 3.5rem;
+      text-align: center;
+      position: relative;
+      img {
+        width: 65%;
+        margin-top: 0.8rem;
+      }
+      i {
+        position: absolute;
+        top: 0.3em;
+        left: 2.5rem;
+        background: red;
+        border-radius: 50rem;
+        color: #fff;
+        text-align: center;
+        display: block;
+        font-style: inherit;
+        font-size: 0.8rem;
+        height: 1.2rem;
+        width: 1.2rem;
+        line-height: 1.3rem;
+      }
+    }
+    .info {
+      float: left;
+      overflow: hidden;
+      height: 100%;
+      width: 84%;
+      margin-left: 1%;
+      padding: 0.6rem 0 0.4rem;
+      span {
+        display: block;
+        height: 1.5rem;
+        line-height: 1.5rem;
+        overflow: hidden;
+      }
+      p {
+        display: block;
+        height: 1.5rem;
+        line-height: 1.5rem;
+        color: #666;
+        font-size: 0.8rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+}
+</style>
+
+<script>
+import Vue from 'vue';
+import { Toast, MessageBox } from 'mint-ui';
+import request from "@/utils/request"
+
+export default {
+    data() {
+        return {
+            contacts: [],//联系人列表
+            onlineContacts: [],//已上线联系人列表
+            selected: "artificial",
+            message: ''
+        }
+    },
+    sockets: {
+        // 监听服务器同步的客户端列表
+        synchroContacts: function (clients) {
+            this.onlineContacts = clients;
+        },
+        // 全局应用内检测服务端的消息推送
+        receiveMsg: function (o) {
+
+            for (let [index, item] of this.contacts.entries()) {
+
+                if (o.from_user["_id"] == item["_id"]) {
+
+                    let unread = item["unread"] || 0;
+                    this.$set(this.contacts, index, Object.assign(this.contacts[index], { "unread": unread + 1 }));
+                }
+            }
+
+            console.log(this.contacts);
+        }
+    },
+    watch: {
+        /**
+         * 根据在线客户端列表驱动所有客户端在线状态
+         */
+        onlineContacts: function (onlineList) {
+
+            // 当前用户所有联系人列表
+            for (let [index, val] of this.contacts.entries()) {
+
+                //当前用户所有在线的联系人列表
+                let flag = false,
+                    socketId = "";
+
+                for (let client of onlineList) {
+
+                    if (client["userId"] == val._id) {
+                        flag = true;
+                        socketId = client["socketId"];
+                        break;
+                    }
+                }
+
+                if (flag) {
+                    Vue.set(this.contacts, index, Object.assign(this.contacts[index], { isActive: true, socketId: socketId }))
+                } else {
+                    Vue.set(this.contacts, index, Object.assign(this.contacts[index], { isActive: false, socketId: "" }))
+                }
+            }
+        },
+        contacts: function (list) {
+            // console.log(list)
+        }
+    },
+    created() {
+
+        // 加载最近联系人列表
+        request.post("/contacts/getAll", this.loginForm).then(e => {
+
+            if (e.err) {
+                Toast(e.err);
+            } else {
+                let result = e.result;
+                this.contacts = result.contacts;
+                // 通知服务器，当前客户端已上线
+                this.$socket.emit('join');
+            }
+        }).catch(error => {
+            Toast(error);
+        });
+    },
+    methods: {
+        // 单聊某一位用户
+        singleChat: function (userId, nickname) {
+
+            this.$router.push({
+                path: '/chat',
+                query: {
+                    userId: userId,
+                    nickname: nickname
+                }
+            });
+        }
+    }
+}
+
+</script>

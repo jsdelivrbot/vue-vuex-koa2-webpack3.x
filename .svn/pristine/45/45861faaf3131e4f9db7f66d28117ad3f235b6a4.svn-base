@@ -1,0 +1,68 @@
+const socketio = require('socket.io');
+const http = require('http');
+const log = require('../utils/logUtil.js');
+const ipUtil = require('../utils/ipUtil');
+const cookieUtil = require('../utils/cookieUtil');
+const config = require('./config');
+const store = require('../store');//session容器
+
+module.exports = function (app) {
+
+    let server = http.createServer(app.callback());
+    let io = socketio(server);
+    server.listen(666);
+
+    log.success('消息服务连接成功...');
+
+    /**
+     * 监听客户端连接
+     */
+    io.on('connection', function (socket) {
+
+        let cookie = socket.request.headers.cookie;
+
+        let sessionId = cookieUtil.getCookie(cookie, config.sessionIdKey);
+
+        console.log(store.get(sessionId));
+
+
+
+        let ip = socket.handshake.address.substring(7);
+
+        // 获取当前客户端地址位置信息
+        ipUtil.getIpInfo(ip, function (err, result) {
+
+            if (err) {
+                log.error(err);
+            } else {
+                let position = result.data;
+                broadcast(position.city + '进入房间!');
+            }
+        });
+
+        /**
+         * 监听客户端发送的消息
+         */
+        socket.on('sendMsg', function (msg) {
+
+            console.log(msg);
+        });
+    });
+
+
+    /**
+     * 广播消息
+     */
+    function broadcast(msg) {
+
+        io.sockets.emit("broadcast", msg);
+    }
+
+    /**
+     * 定向消息
+     */
+    function directional(sid, msg) {
+
+        io.sockets.socket(sid).emit("directional", msg);
+    }
+}

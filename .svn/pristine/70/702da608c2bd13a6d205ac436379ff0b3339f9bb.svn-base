@@ -1,0 +1,8 @@
+/**
+ * 更新登录状态
+ * @param {*} state 
+ * @param {*} e 
+ */
+export const changeIsLogin = (state, e) => {
+    state.isLogin = e;
+}

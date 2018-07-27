@@ -1,0 +1,1 @@
+webpackJsonp([8],{206:function(e,t,l){"use strict";Object.defineProperty(t,"__esModule",{value:!0});var n=function(){var e=this,t=e.$createElement;return(e._self._c||t)("div",[e._v("消息")])},i=[];n._withStripped=!0;var r=l(1),s=Object(r.a)(null,n,i,!1,null,null,null);s.options.__file="src\\views\\message\\index.vue";t.default=s.exports}});

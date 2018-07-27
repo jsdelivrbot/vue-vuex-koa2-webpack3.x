@@ -1,0 +1,56 @@
+export default {
+    mode: 'history',
+    routes: [
+        // 首页
+        {
+            path: '/index',
+            component: () => import('./views/index/main.vue')
+        },
+        // 登录
+        {
+            path: '/login',
+            component: () => import('./views/login/main.vue')
+        },
+        // 注册
+        {
+            path: '/register',
+            component: () => import('./views/register/main.vue')
+        },
+        // 个人中心
+        {
+            path: '/mine',
+            component: () => import('./views/mine/main.vue'),
+            meta: {
+                requiresAuth: true
+            }
+        },
+        // 个人资料
+        {
+            path: '/datum',
+            component: () => import('./views/mine/datum.vue'),
+            meta: {
+                requiresAuth: true
+            }
+        },
+        {
+            path: '/strategy',
+            component: () => import('./views/strategy/main.vue')
+        },
+        {
+            path: '/travels',
+            component: () => import('./views/travels/main.vue')
+        },
+        {
+            path: '/companions',
+            component: () => import('./views/companions/main.vue')
+        },
+        {
+            path: '/visa',
+            component: () => import('./views/visa/main.vue')
+        },
+        {
+            path: '*',
+            component: () => import('./views/index/main.vue')
+        }
+    ]
+}

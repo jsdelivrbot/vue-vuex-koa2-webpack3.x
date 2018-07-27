@@ -1,0 +1,1 @@
+webpackJsonp([6],{68:function(e,n,t){"use strict";Object.defineProperty(n,"__esModule",{value:!0});var l=function(){var e=this,n=e.$createElement;return(e._self._c||n)("div",[e._v("结伴")])},i=[];l._withStripped=!0;var r=t(0),u=Object(r.a)(null,l,i,!1,null,null,null);u.options.__file="src\\views\\companions\\main.vue";n.default=u.exports}});

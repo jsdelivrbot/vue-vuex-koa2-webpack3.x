@@ -1,0 +1,15 @@
+{
+    "presets": [
+        [
+            "env",
+            {
+                "modules": false
+            }
+        ]
+    ],
+    "plugins": [
+        "syntax-dynamic-import",
+        "babel-plugin-transform-object-rest-spread",
+        ["component", [{ "libraryName": "mint-ui", "style": true }]]
+    ]
+}

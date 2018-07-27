@@ -1,0 +1,306 @@
+<template>
+    <div class="chat">
+        <header>
+            <router-link class="logo" to="/message">新消息（0条）</router-link>
+            <h6>倪妮</h6>
+            <i></i>
+        </header>
+        <ul class="msg">
+            <li class="other">
+                <img src="./images/other.jpg" />
+                <div class="info">
+                    <label>倪妮
+                        <span>[15:34]</span>
+                    </label>
+                    <p>你能做我男朋友吗？</p>
+                </div>
+            </li>
+            <li class="my">
+                <img src="./images/single.svg" />
+                <div class="info">
+                    <label>Jeffrey
+                        <span>[15:34]</span>
+                    </label>
+                    <p>好呀。。。</p>
+                </div>
+            </li>
+            <li class="other">
+                <img src="./images/other.jpg" />
+                <div class="info">
+                    <label>倪妮
+                        <span>[15:34]</span>
+                    </label>
+                    <p>今天播出的快乐大本营匆匆那年剧组全程高能，倪妮中学日记爆笑全场，尤其是和橘子杠上那篇，一个橘子就五六片橘瓣，居然长十几个核，干脆叫核橘好了，哈哈哈哈，负能量满满的日记实在太可爱了，我眼泪都笑出来了！彭于晏打篮球和玩跷跷板简直帅呆了！魏晨和初恋女友电话连线真情流露很感人！</p>
+                </div>
+            </li>
+            <li class="my">
+                <img src="./images/single.svg" />
+                <div class="info">
+                    <label>Jeffrey
+                        <span>[15:34]</span>
+                    </label>
+                    <p>今天播出的快乐大本营匆匆那年剧组全程高能，倪妮中学日记爆笑全场，尤其是和橘子杠上那篇，一个橘子就五六片橘瓣，居然长十几个核，干脆叫核橘好了，哈哈哈哈，负能量满满的日记实在太可爱了，我眼泪都笑出来了！彭于晏打篮球和玩跷跷板简直帅呆了！魏晨和初恋女友电话连线真情流露很感人！</p>
+                </div>
+            </li>
+            <li class="other">
+                <img src="./images/other.jpg" />
+                <div class="info">
+                    <label>倪妮
+                        <span>[15:34]</span>
+                    </label>
+                    <p>你能做我男朋友吗？</p>
+                </div>
+            </li>
+            <li class="my">
+                <img src="./images/single.svg" />
+                <div class="info">
+                    <label>Jeffrey
+                        <span>[15:34]</span>
+                    </label>
+                    <p>好呀。。。</p>
+                </div>
+            </li>
+            <li class="other">
+                <img src="./images/other.jpg" />
+                <div class="info">
+                    <label>倪妮
+                        <span>[15:34]</span>
+                    </label>
+                    <p>你能做我男朋友吗？</p>
+                </div>
+            </li>
+            <li class="my">
+                <img src="./images/single.svg" />
+                <div class="info">
+                    <label>Jeffrey
+                        <span>[15:34]</span>
+                    </label>
+                    <p>好呀。。。</p>
+                </div>
+            </li>
+            <li class="other">
+                <img src="./images/other.jpg" />
+                <div class="info">
+                    <label>倪妮
+                        <span>[15:34]</span>
+                    </label>
+                    <p>你能做我男朋友吗？</p>
+                </div>
+            </li>
+            <li class="my">
+                <img src="./images/single.svg" />
+                <div class="info">
+                    <label>Jeffrey
+                        <span>[15:34]</span>
+                    </label>
+                    <p>好呀。。。</p>
+                </div>
+            </li>
+            <li class="other">
+                <img src="./images/other.jpg" />
+                <div class="info">
+                    <label>倪妮
+                        <span>[15:34]</span>
+                    </label>
+                    <p>你能做我男朋友吗？</p>
+                </div>
+            </li>
+            <li class="my">
+                <img src="./images/single.svg" />
+                <div class="info">
+                    <label>Jeffrey
+                        <span>[15:34]</span>
+                    </label>
+                    <p>好呀。。。</p>
+                </div>
+            </li>
+            <li class="other">
+                <img src="./images/other.jpg" />
+                <div class="info">
+                    <label>倪妮
+                        <span>[15:34]</span>
+                    </label>
+                    <p>你能做我男朋友吗？</p>
+                </div>
+            </li>
+            <li class="my">
+                <img src="./images/single.svg" />
+                <div class="info">
+                    <label>Jeffrey
+                        <span>[15:34]</span>
+                    </label>
+                    <p>好呀。。。</p>
+                </div>
+            </li>
+            <li class="other">
+                <img src="./images/other.jpg" />
+                <div class="info">
+                    <label>倪妮
+                        <span>[15:34]</span>
+                    </label>
+                    <p>你能做我男朋友吗？</p>
+                </div>
+            </li>
+            <li class="my">
+                <img src="./images/single.svg" />
+                <div class="info">
+                    <label>Jeffrey
+                        <span>[15:34]</span>
+                    </label>
+                    <p>好呀。。。</p>
+                </div>
+            </li>
+            <li class="other">
+                <img src="./images/other.jpg" />
+                <div class="info">
+                    <label>倪妮
+                        <span>[15:34]</span>
+                    </label>
+                    <p>你能做我男朋友吗？</p>
+                </div>
+            </li>
+            <li class="my">
+                <img src="./images/single.svg" />
+                <div class="info">
+                    <label>Jeffrey
+                        <span>[15:34]</span>
+                    </label>
+                    <p>好呀。。。</p>
+                </div>
+            </li>
+        </ul>
+        <div class="operation">
+            <ul class="tool"></ul>
+            <div class="focusing">
+                <input class="content" />
+                <a class="send">发送</a>
+            </div>
+        </div>
+    </div>
+</template>
+<style lang="scss" scoped>
+.chat {
+  header {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    height: 2.5rem;
+    line-height: 2.5rem;
+    text-align: center;
+    background: #008b8b;
+    overflow: hidden;
+    a {
+      width: 30%;
+      display: block;
+      float: left;
+      font-size: 0.8rem;
+      color: #fff;
+      background: url("./images/towards-left.svg") center left 0.5rem no-repeat;
+      background-size: 15%;
+      text-indent: 0.8rem;
+      line-height: 2.6rem;
+    }
+    h6 {
+      width: 50%;
+      padding-right: 10%;
+      float: left;
+      font-size: 1.2rem;
+      color: #fff;
+    }
+    i {
+      display: block;
+      width: 20%;
+      float: left;
+      height: 100%;
+      background: url("./images/more.svg") center right 0.5rem no-repeat;
+      background-size: 40%;
+    }
+  }
+  .msg {
+    height: 100%;
+    padding-top: 2.5rem;
+    overflow: scroll;
+    li {
+      width: 100%;
+      min-height: 3rem;
+      margin: 0.5rem 0;
+      padding-top: 0.25rem;
+      overflow: hidden;
+      img {
+        height: 2.5rem;
+        border-radius: 5rem;
+      }
+      .info {
+        label {
+          height: 1.2rem;
+          line-height: 1.4rem;
+          display: block;
+          color: #666;
+          font-size: 0.8rem;
+          span {
+            color: #999;
+            margin-left: 0.5rem;
+          }
+        }
+        p {
+          font-size: 0.8rem;
+          min-height: 1.3rem;
+          line-height: 1.5rem;
+          display: block;
+          max-width: 19rem;
+        }
+      }
+      &.other {
+        img {
+          float: left;
+          margin-left: 0.5rem;
+        }
+        .info {
+          float: left;
+          margin-left: 0.6rem;
+          label {
+            text-align: left;
+          }
+        }
+      }
+      &.my {
+        img {
+          float: right;
+          margin-right: 0.5rem;
+        }
+        .info {
+          float: right;
+          margin-right: 0.5rem;
+          label {
+            text-align: right;
+          }
+        }
+      }
+    }
+  }
+}
+</style>
+
+<script>
+
+import { Navbar, TabItem } from 'mint-ui';
+
+export default {
+    data() {
+        return {
+            selected: "artificial",
+            message: ''
+        }
+    },
+    sockets: {
+        // 接收广播
+        broadcast: function (e) {
+
+            console.log(e);
+        }
+    },
+    methods: {
+    }
+}
+
+</script>

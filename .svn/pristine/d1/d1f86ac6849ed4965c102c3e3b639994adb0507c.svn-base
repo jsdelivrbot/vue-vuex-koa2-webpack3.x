@@ -1,0 +1,41 @@
+export default {
+    mode: 'history',
+    routes: [
+        {
+            path: '/index',
+            component: () => import('./views/index/main.vue')
+        },
+        {
+            path: '/login',
+            component: () => import('./views/login/main.vue')
+        },
+        {
+            path: '/register',
+            component: () => import('./views/register/main.vue')
+        },
+        {
+            path: '/mine',
+            component: () => import('./views/mine/main.vue')
+        },
+        {
+            path: '/strategy',
+            component: () => import('./views/strategy/main.vue')
+        },
+        {
+            path: '/travels',
+            component: () => import('./views/travels/main.vue')
+        },
+        {
+            path: '/companions',
+            component: () => import('./views/companions/main.vue')
+        },
+        {
+            path: '/visa',
+            component: () => import('./views/visa/main.vue')
+        },
+        {
+            path: '*',
+            component: () => import('./views/index/main.vue')
+        }
+    ]
+}

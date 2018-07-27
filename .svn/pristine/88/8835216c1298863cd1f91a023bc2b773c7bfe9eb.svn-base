@@ -1,0 +1,256 @@
+<template>
+  <div>
+    <form model="registerForm" class="register">
+      <div class="logo">
+        <img src="../../images/logo.png" />
+      </div>
+      <div class="register-mode">
+        <a class="active">邮箱注册</a>
+        <i></i>
+        <a>手机号注册</a>
+      </div>
+      <div class="input-wrap">
+        <input v-model="registerForm.email" name="email" v-validate="'required|email'" type="text" placeholder="您的邮箱地址" maxlength="18" />
+        <span v-show="errors.has('email')">{{ errors.first('email') }}</span>
+      </div>
+      <div class="input-wrap">
+        <div class="code_wrap">
+          <input class="validate_code" v-model="registerForm.validateCode" name="validateCode" v-validate="'required|digits:4'" type="text" placeholder="您的验证码" maxlength="4" />
+          <a @click="sendValidateCode" v-bind:class="{ 'btn_disable' : validateCodeLock }" class="send_code">{{validateCodeText}}</a>
+        </div>
+        <span v-show="sendCodeError || errors.has('validateCode')">{{ sendCodeError ? sendCodeError : errors.first('validateCode') }}</span>
+      </div>
+      <div class="input-wrap" v-if="isSendCode">
+        <input v-model="registerForm.password" name="password" v-validate="'required|alpha_num|min:6|max:32'" type="password" placeholder="您的密码" maxlength="32" />
+        <span v-show="errors.has('password')">{{ errors.first('password') }}</span>
+      </div>
+      <div class="btns">
+        <a @click="register" v-bind:class="{ 'btn_disable' : registerLock }" class="register-btn">注册</a>
+        <router-link class="login-btn" to="/login">快速登录</router-link>
+      </div>
+    </form>
+  </div>
+</template>
+<style lang="scss" scoped>
+.register {
+  margin: 0 1rem;
+  .logo {
+    text-align: center;
+    padding: 5rem 0;
+  }
+  .register-mode {
+    overflow: hidden;
+    margin-bottom: 2rem;
+    height: 1.8rem;
+    i {
+      width: 1%;
+      background: #eee;
+      float: left;
+      display: block;
+      height: 100%;
+    }
+    a {
+      width: 49.5%;
+      display: block;
+      float: left;
+      text-align: center;
+      font-size: 1.2rem;
+      color: #999;
+      &.active {
+        font-weight: bold;
+      }
+    }
+  }
+  .input-wrap {
+    margin: 1rem 0;
+    overflow: hidden;
+    input {
+      background: #eee;
+      line-height: 2.5rem;
+      height: 2.6rem;
+      border-radius: 0.5rem;
+      width: 100%;
+      font-size: 1.1rem;
+      color: #666;
+      text-align: center;
+      &.validate_code {
+        overflow: hidden;
+        width: 65%;
+        float: left;
+      }
+    }
+    .code_wrap {
+      overflow: hidden;
+      a.send_code {
+        width: 32%;
+        margin-left: 3%;
+        display: block;
+        float: left;
+        height: 2.6rem;
+        line-height: 2.6rem;
+        text-align: center;
+        background: #1db0b8;
+        color: #fff;
+        border-radius: 0.2rem;
+        &.btn_disable {
+          background: #999;
+        }
+      }
+    }
+    span {
+      font-size: 0.8rem;
+      text-align: right;
+      width: 100%;
+      display: block;
+      color: #d19a66;
+      line-height: 2rem;
+      height: 1.5rem;
+    }
+  }
+  .btns {
+    a {
+      display: block;
+      width: 100%;
+      text-align: center;
+      height: 2.5rem;
+      line-height: 2.6rem;
+      font-weight: bold;
+      border-radius: 1rem;
+      margin: 1rem 0;
+      &.register-btn {
+        background: #008b8b;
+        color: #fff;
+      }
+      &.login-btn {
+        background: #fff;
+        color: #008b8b;
+        border: 1px solid #008b8b;
+      }
+      &.btn_disable {
+        background: #999;
+      }
+    }
+  }
+}
+</style>
+<script>
+
+import { Toast, MessageBox } from 'mint-ui';
+import request from "@/utils/request"
+import md5 from "js-md5"
+import '@/utils/validate.js'
+
+export default {
+  name: "carrousel",
+  data() {
+    return {
+      registerLock: false,//注册锁
+      validateCodeText: "发送验证码",
+      validateCodeLock: false,//发送验证码锁
+      isSendCode: false,//是否已经发送了验证码
+      sendCodeError: '',
+      registerForm: {
+        email: '',
+        validateCode: '',
+        password: ''
+      }
+    }
+
+  },
+  components: {
+  },
+  computed: {
+    encryptPassword: function () {
+      return md5(this.registerForm.password);
+    }
+  },
+  mounted() {
+  },
+  methods: {
+
+    // 注册
+    register() {
+
+      if (this.registerLock) {
+        return;
+      }
+
+      this.$validator.validateAll().then((flag) => {
+
+        if (!flag) {
+          return;
+        }
+
+        if (!this.isSendCode) {
+          this.sendCodeError = "请点击发送验证码!";
+          return;
+        } else {
+          this.sendCodeError = "";
+        }
+
+        this.registerLock = true;
+        this.registerForm.password = this.encryptPassword;
+        request.post("/user/register", this.registerForm).then(result => {
+          if (result.vcode == false) {
+            Toast("验证码错误!");
+            this.registerLock = false;
+          } else {
+            Toast("注册成功!");
+          }
+        }).catch(error => {
+          console.log(error);
+        });
+
+      });
+    },
+
+    // 发送验证码
+    sendValidateCode() {
+
+      let _this = this,
+        count = 60;//倒计时时长
+
+      // 邮箱||手机必须验证通过
+      this.$validator.validate("email").then((flag) => {
+
+        if (!flag || this.validateCodeLock) {
+          return;
+        }
+
+        _this.validateCodeLock = true;
+        _this.validateCodeText = count + "秒";
+
+        let time = setInterval(function () {
+          if (count == 0) {
+            initSendCode.call(_this);
+            return;
+          }
+          _this.validateCodeText = --count + "秒";
+        }, 1000);
+
+        request.post("/user/sendCode", _this.registerForm).then(result => {
+          if (result.count == false) {
+            Toast("邮箱已经存在!");
+            initSendCode.call(_this);
+          } else if (result.status == false) {
+            Toast("验证码发送失败!");
+            initSendCode.call(_this);
+          } else {
+            Toast("验证码已发送!");
+            _this.isSendCode = true;
+          }
+        }).catch(error => {
+          console.log(error);
+        });
+
+        function initSendCode() {
+          clearInterval(time);
+          _this.validateCodeText = "发送验证码";
+          _this.validateCodeLock = false;
+        }
+
+      });
+    }
+  }
+};
+</script>

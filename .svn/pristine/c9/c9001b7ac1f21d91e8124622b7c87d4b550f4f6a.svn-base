@@ -1,0 +1,9 @@
+const router = require('koa-router')();
+const platform = require('./platform');
+const userRouter = require('./user');
+
+// 装载路由
+router.use(platform.routes(), platform.allowedMethods())
+router.use(userRouter.routes(), userRouter.allowedMethods())
+
+module.exports = router

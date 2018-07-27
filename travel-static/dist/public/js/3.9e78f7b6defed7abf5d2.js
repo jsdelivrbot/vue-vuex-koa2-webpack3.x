@@ -1,0 +1,1 @@
+webpackJsonp([3],{25:function(e,t,l){"use strict";Object.defineProperty(t,"__esModule",{value:!0});var n=function(){var e=this,t=e.$createElement;return(e._self._c||t)("div",[e._v("游记")])},r=[];n._withStripped=!0;var i=l(0),u=Object(i.a)(null,n,r,!1,null,null,null);u.options.__file="src\\views\\travels\\main.vue";t.default=u.exports}});

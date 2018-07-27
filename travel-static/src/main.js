@@ -1,0 +1,72 @@
+import "./css/global.css";//全局样式
+
+import Vue from "vue"
+import VueRouter from "vue-router"
+import Main from "./views/main/index.vue"
+import routes from "./routes"
+import components from './components' //加载公共组件
+import store from "./sotre"
+import { getCookie } from '@/utils/cookie'
+import VueSocketio from 'vue-socket.io';
+import config from '../config'
+
+/**
+ * socket注册
+ */
+Vue.use(VueSocketio, config.socketUrl);
+
+/**
+ * 全局路由注册
+ */
+Vue.use(VueRouter);
+const router = new VueRouter(routes);
+router.beforeEach((to, from, next) => {
+
+    let token = getCookie('token');
+    // 访问权限控制
+    if ((!token || token === null) && to.matched.some(record => record.meta.requiresAuth)) {
+        router.push({
+            path: '/login',
+            query: { redirect: to.fullPath } // 将刚刚要去的路由path（却无权限）作为参数，方便登录成功后直接跳转到该路由
+        });
+    } else if (token && to.matched.some(record => /\/login/.test(record.path))) {
+        router.push({ path: '/mine' });
+    }
+
+    next();
+})
+
+/**
+ * 全局组件注册
+ */
+Object.keys(components).forEach((key) => {
+    var name = key.replace(/(\w)/, (v) => v.toUpperCase()); //首字母大写
+    Vue.component(`${name}`, components[key])
+});
+
+/**
+ * 时间格式化全局过滤器
+ */
+import moment from 'moment'
+Vue.filter('dateformat', function (datetime, pattern = 'HH:mm') {
+    if(datetime){
+        return moment.unix(datetime / 1000).format(pattern)
+    }
+    return '';
+});
+
+/**
+ * UI组件注册
+ */
+import MintUI from 'mint-ui';
+Vue.use(MintUI);
+
+/**
+ * 创建实例
+ */
+new Vue({
+    el: "#app",
+    store,
+    router: router,
+    render: h => h(Main)
+})

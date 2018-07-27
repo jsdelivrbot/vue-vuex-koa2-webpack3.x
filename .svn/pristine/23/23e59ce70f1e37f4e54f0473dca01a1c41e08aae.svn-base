@@ -1,0 +1,194 @@
+<template>
+  <div>
+    <section class="personal">
+      <img class="portrait" src="https://gw.alicdn.com/imgextra/i3/6000000007903/TB2cXJsXgjN8KJjSZFkXXaboXXa_!!0-travel.jpg_500x500q75.jpg_.webp" />
+      <span class="nickname">你的名字</span>
+      <router-link to="/datum" class="info"></router-link>
+    </section>
+    <section class="menu">
+      <ul class="business">
+        <li>
+          <a>
+            <label>我的游记</label>
+            <span>0篇</span>
+          </a>
+        </li>
+        <li>
+          <a>
+            <label>我的结伴</label>
+            <span>0个</span>
+          </a>
+        </li>
+        <li>
+          <a>
+            <label>我的消息</label>
+            <span>0条</span>
+          </a>
+        </li>
+        <li>
+          <a>
+            <label>我的收藏</label>
+            <span>0条</span>
+          </a>
+        </li>
+        <li>
+          <a>
+            <label>邀请好友</label>
+            <span>0条</span>
+          </a>
+        </li>
+      </ul>
+      <ul class="system">
+        <li>
+          <a>
+            <label>客服中心</label>
+            <i></i>
+          </a>
+        </li>
+        <li>
+          <a>
+            <label>安全中心</label>
+            <i></i>
+          </a>
+        </li>
+        <li>
+          <a>
+            <label>帮助中心</label>
+          </a>
+        </li>
+      </ul>
+    </section>
+  </div>
+</template>
+<style lang="scss" scoped>
+.personal {
+  text-align: center;
+  overflow: hidden;
+  background: #82abba;
+  position: relative;
+  .portrait {
+    width: 7rem;
+    height: 7rem;
+    display: block;
+    margin: 3rem auto 1rem;
+    border-radius: 12rem;
+    box-shadow: 0rem 0rem 1.5rem rgba(255, 255, 255, 0.8);
+    border: 4px solid rgba(255, 255, 255, 0.4);
+  }
+  .nickname {
+    color: #fff;
+    display: block;
+    margin-bottom: 2rem;
+  }
+  a.info {
+    display: block;
+    background: url("./images/geren.svg") no-repeat center center;
+    background-size: contain;
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+}
+.menu {
+  ul {
+    margin: 1rem 0;
+    box-shadow: 0px 0px 50px #efefef;
+    li {
+      height: 3.2rem;
+      line-height: 3.4rem;
+      border-bottom: 1px solid #efefef;
+      text-indent: 3rem;
+      overflow: hidden;
+      background: no-repeat 1rem center;
+      &:last-child {
+        border-bottom: 0px;
+      }
+      span {
+        float: right;
+        padding-right: 1.2rem;
+        font-size: 0.8rem;
+        color: #666;
+      }
+      i {
+        background: #ff6b6b;
+        width: 0.5rem;
+        height: 0.5rem;
+        float: right;
+        border-radius: 10rem;
+        margin-right: 1.6rem;
+        margin-top: 1.4rem;
+      }
+    }
+    &:nth-child(1) {
+      li {
+        &:nth-child(1) {
+          background-image: url("./images/youji.svg");
+          background-size: 1.8rem;
+        }
+        &:nth-child(2) {
+          background-image: url("./images/jieban.svg");
+          background-size: 1.8rem;
+        }
+        &:nth-child(3) {
+          background-image: url("./images/xiaoxi.svg");
+          background-size: 1.8rem;
+        }
+        &:nth-child(4) {
+          background-image: url("./images/shoucang.svg");
+          background-size: 1.8rem;
+        }
+        &:nth-child(5) {
+          background-image: url("./images/yaoqing.svg");
+          background-size: 1.8rem;
+        }
+      }
+    }
+    &:nth-child(2) {
+      li {
+        &:nth-child(1) {
+          background-image: url("./images/kefu.svg");
+          background-size: 1.8rem;
+        }
+        &:nth-child(2) {
+          background-image: url("./images/anquan.svg");
+          background-size: 1.8rem;
+        }
+        &:nth-child(3) {
+          background-image: url("./images/bangzhu.svg");
+          background-size: 1.8rem;
+        }
+      }
+    }
+  }
+}
+</style>
+<script>
+
+import { Toast, MessageBox } from 'mint-ui'
+import { getToken } from '@/utils/auth'
+import request from "@/utils/request"
+
+export default {
+  name: "carrousel",
+  data() {
+    return {
+    };
+  },
+  components: {
+  },
+  computed: {
+  },
+  mounted() {
+
+    request.post("/user/getUserInfo").then(result => {
+      console.log(result);
+    }).catch(error => {
+      console.log(error);
+    });
+  },
+  methods: {
+  }
+};
+</script>

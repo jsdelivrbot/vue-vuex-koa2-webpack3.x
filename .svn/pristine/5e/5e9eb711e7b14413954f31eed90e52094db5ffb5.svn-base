@@ -1,0 +1,30 @@
+const contactsDao = require('../daos/contactsDao')
+const mongodb = require('mongodb')
+
+module.exports.getAllContacts = async (ctx, next) => {
+
+    let _id = ctx.session.user._id;
+
+    let result = await contactsDao.getAllContacts(
+        { "_id": { $ne: mongodb.ObjectId(_id) } },
+        { "email": 1, "nickname": 1, "portrait_img_src": 1, "sex": 1, "from_message": 1 }
+    ).then(e => {
+        return e;
+    });
+
+    let data = result.data || [];
+
+    for (let [index, item] of data.entries()) {
+
+        let messArr = item.from_message.filter(function (item) {
+            return item.status == 0;
+        });
+
+        data[index]["unread"] = messArr.length;
+        data[index]["lastMsg"] = messArr[messArr.length - 1]["content"];
+
+        delete item.from_message;
+    }
+
+    ctx.body = { "err": result.err, "result": { "contacts": data } }
+}

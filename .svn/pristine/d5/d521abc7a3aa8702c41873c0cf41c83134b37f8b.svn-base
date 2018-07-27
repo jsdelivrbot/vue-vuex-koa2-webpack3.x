@@ -1,0 +1,392 @@
+<template>
+  <div class="chat">
+    <header>
+      <router-link class="logo" to="/message">新消息（{{noticeCount}}条）</router-link>
+      <h6>{{targetName}}</h6>
+      <i></i>
+    </header>
+    <div id="msg" class="msg" :style="{height:msgHeight}">
+      <!--未读信息-->
+      <ul>
+        <li v-for="(item, index) in unreadList" :key="index" :class="item.from">
+          <img :src="item.from_user[0].portrait_img_src || require('./images/single.svg')" />
+          <div class="info">
+            <label>{{item.from_user[0].nickname}}
+              <span>[{{item.create_date | formatDate}}]</span>
+            </label>
+            <p>{{item.content}}</p>
+          </div>
+        </li>
+      </ul>
+      <div v-if="unreadList.length" class="line">以上是未读消息...</div>
+      <!--历史信息-->
+      <ul>
+        <li v-for="(item, index) in historyList" :key="index" :class="item.from">
+          <img :src="item.from_user[0].portrait_img_src || require('./images/single.svg')" />
+          <div class="info">
+            <label>{{item.from_user[0].nickname}}
+              <span>[{{item.create_date | formatDate}}]</span>
+            </label>
+            <p>{{item.content}}</p>
+          </div>
+        </li>
+      </ul>
+      <div v-if="historyList.length" class="line">以上是历史消息...</div>
+      <!--即时信息-->
+      <ul>
+        <li v-for="(item, index) in messageList" :key="index" :class="item.from">
+          <img :src="item.from_user.portrait_img_src || require('./images/single.svg')" />
+          <div class="info">
+            <label>{{item.from_user.nickname}}
+              <span>[{{item.create_date}}]</span>
+            </label>
+            <p>{{item.content}}</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="operation">
+      <ul class="tool"></ul>
+      <form class="focusing" action="#">
+        <input class="content" v-model="msg" />
+        <i class="emoticon"></i>
+        <!-- <i class="media"></i> -->
+        <i @click="sendMsg" class="send"></i>
+      </form>
+    </div>
+  </div>
+</template>
+<style lang="scss" scoped>
+.chat {
+  header {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    height: 2.8rem;
+    line-height: 2.8rem;
+    text-align: center;
+    background: #008b8b;
+    overflow: hidden;
+    a {
+      width: 35%;
+      display: block;
+      float: left;
+      font-size: 0.8rem;
+      color: #fff;
+      background: url("./images/towards-left.svg") center left 0.5rem no-repeat;
+      background-size: 15%;
+      text-indent: 0.8rem;
+    }
+    h6 {
+      width: 45%;
+      padding-right: 15%;
+      float: left;
+      font-size: 1.2rem;
+      color: #fff;
+    }
+    i {
+      display: block;
+      width: 20%;
+      float: left;
+      height: 100%;
+      background: url("./images/more.svg") center right 0.5rem no-repeat;
+      background-size: 40%;
+    }
+  }
+  .msg {
+    overflow: scroll;
+    position: fixed;
+    width: 100%;
+    top: 2.8rem;
+    ul {
+      overflow: hidden;
+      li {
+        width: 100%;
+        min-height: 3rem;
+        margin: 1.2rem 0;
+        padding-top: 0.25rem;
+        overflow: hidden;
+        img {
+          width: 2.5rem;
+          height: 2.5rem;
+          border-radius: 5rem;
+        }
+        .info {
+          label {
+            height: 1.2rem;
+            line-height: 1.4rem;
+            display: block;
+            color: #666;
+            font-size: 0.8rem;
+            span {
+              color: #999;
+              margin-left: 0.5rem;
+            }
+          }
+          p {
+            font-size: 0.8rem;
+            min-height: 1.3rem;
+            line-height: 1.5rem;
+            display: block;
+            max-width: 19rem;
+            white-space: normal;
+            word-break: break-all;
+          }
+        }
+        &.other {
+          img {
+            float: left;
+            margin-left: 0.5rem;
+          }
+          .info {
+            float: left;
+            margin-left: 0.6rem;
+            label {
+              text-align: left;
+            }
+            p {
+              text-align: left;
+            }
+          }
+        }
+        &.my {
+          img {
+            float: right;
+            margin-right: 0.5rem;
+          }
+          .info {
+            float: right;
+            margin-right: 0.5rem;
+            label {
+              text-align: right;
+            }
+            p {
+              text-align: left;
+            }
+          }
+        }
+      }
+    }
+    .line {
+      padding: 0 20px 0;
+      margin: 0.5rem auto 1rem;
+      line-height: 0.1rem;
+      border-left: 7.5rem dashed #eee;
+      border-right: 7.5rem dashed #eee;
+      text-align: center;
+      font-size: 0.7rem;
+      color: #ccc;
+      width: 92%;
+    }
+  }
+  .operation {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 3.2rem;
+    padding: 0.35rem 0;
+    border-top: 1px solid #eee;
+    background: #efefef;
+    .focusing {
+      margin: 0.25rem 0.6rem;
+      height: 2rem;
+      input {
+        width: 20rem;
+        height: 2rem;
+        line-height: 2rem;
+        border-radius: 0.2rem;
+        border: 1px solid #ddd;
+        float: left;
+        margin-right: 0.4rem;
+        text-indent: 0.5rem;
+      }
+      i {
+        width: 1.9rem;
+        margin: 0 0.1rem;
+        height: 1.9rem;
+        float: left;
+        display: block;
+        &.emoticon {
+          background: url("./images/emoticon.svg") no-repeat center center;
+          background-size: contain;
+        }
+        &.media {
+          background: url("./images/media.svg") no-repeat center center;
+          background-size: contain;
+        }
+        &.send {
+          background: url("./images/send.svg") no-repeat center center;
+          background-size: contain;
+        }
+      }
+    }
+  }
+}
+</style>
+
+<script>
+
+import { mapGetters } from 'vuex'
+import { Navbar, TabItem } from 'mint-ui';
+import { Toast, MessageBox } from 'mint-ui';
+import moment from 'moment'
+import request from "@/utils/request"
+
+export default {
+  data() {
+    return {
+      selected: "artificial",
+      noticeCount: 0,
+      messageList: [],//即时信息
+      unreadList: [],//未读信息
+      historyList: [],//历史消息
+      msg: ''
+    }
+  },
+  sockets: {
+    receiveMsg: function (o) {
+      this.messageList.push(o);
+      // 如为接收方，且已读，则向服务器进行反馈
+      if (o.msgId && this.$store.getters.isReadable) {
+        this.updateMessageByMid(o.msgId);
+      }
+    }
+  },
+  filters: {
+    formatDate: function (value) {
+      return moment.unix(value).format('HH:mm');
+    }
+  },
+  computed: {
+
+    ...mapGetters(['isReadable', 'unreadMessageCount']),
+
+    targetName: function () {
+      return this.$route.query.nickname;
+    },
+
+    msgHeight: function () {
+
+      return window.screen.height - 3.2 * 16 - 2.8 * 16;
+    }
+  },
+  watch: {
+    messageList() {
+      this.setScrollTop();
+    },
+    unreadList() {
+      this.setScrollTop();
+    },
+    historyList() {
+      this.setScrollTop();
+    }
+  },
+  created() {
+
+    // 读取所有未读消息
+    this.getAllUnreadList().then(e => {
+
+      if (!e.length) {
+        // 不存在未读消息则拉去最近五条信息
+        this.getHistoryMessage();
+      } else {
+        //存在则更新所有未读消息状态为已读
+        this.updateUnreadMessage();
+      }
+    });
+
+  },
+  methods: {
+
+    setScrollTop: function () {
+      setTimeout(function () {
+        document.getElementById('msg').scrollTop = document.getElementById('msg').scrollHeight;
+      }, 1);
+    },
+    // 更新消息读取状态
+    updateMessageByMid: function (msgId) {
+
+      request.post("/message/updateMessageByMid", {
+        "_id": msgId
+      }).then(e => {
+
+        if (e.err) {
+          Toast(e.err);
+        }
+
+      }).catch(error => {
+        Toast(error);
+      });
+    },
+    // 更新消息读取状态
+    getHistoryMessage: function () {
+
+      request.post("/message/getHistoryMessage").then(e => {
+
+        if (e.err) {
+          Toast(e.err);
+        } else {
+          this.historyList = e.result;
+        }
+
+      }).catch(error => {
+        Toast(error);
+      });
+    },
+    // 更新消息读取状态
+    updateUnreadMessage: function () {
+
+      request.post("/message/updateUnreadMessage").then(e => {
+        if (e.err) {
+          Toast(e.err);
+        } else {
+          this.$store.commit("changeUnreadMessageCount", 0);
+        }
+      }).catch(error => {
+        Toast(error);
+      });
+    },
+
+    // 拉取未读消息
+    getAllUnreadList: function () {
+
+      let _this = this;
+      return new Promise(function (resolve, reject) {
+
+        request.post("/message/getAllUnreadList", {
+          from_uid: _this.$route.query.userId
+        }).then(e => {
+          if (e.err) {
+            Toast(e.err);
+          } else {
+            let result = e.result;
+            _this.unreadList = result;
+            resolve(result);
+          }
+        }).catch(error => {
+          Toast(error);
+        });
+      })
+    },
+    // 发送消息
+    sendMsg: function () {
+
+      let query = this.$route.query,
+        userId = query.userId;
+
+      this.$socket.emit('sendMsg', {
+        toUserId: userId,
+        msg: this.msg
+      });
+
+      this.$socket.emit('sendMsg', {
+        toSocketId: this.$socket.id,
+        msg: this.msg
+      });
+
+      this.msg = "";
+    }
+  }
+}
+
+</script>

@@ -1,0 +1,4 @@
+/**
+ * 获取登录状态
+ */
+export const isLogin = state => state.isLogin;

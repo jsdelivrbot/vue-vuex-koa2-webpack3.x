@@ -1,0 +1,250 @@
+<template>
+  <div>
+    <ul>
+      <li>
+        <label>昵称：</label>
+        <input type="text" v-model="nickname" name="nickname" maxlength="30" v-validate="'required|alpha'" />
+      </li>
+      <li>
+        <label>性别：</label>
+        <span class="to_select" @click="actionSex">{{reversedSex}}</span>
+      </li>
+      <li>
+        <label>出生日期：</label>
+        <span class="to_select" @click="actionBirth">{{reversedBirth}}</span>
+      </li>
+      <li>
+        <label>所在地：</label>
+        <span class="to_select" @click="actionRegion">{{reversedRegion}}</span>
+      </li>
+    </ul>
+    <div class="msg" v-show="errors.has('nickname')">{{ errors.first('nickname') }}</div>
+    <a class="btn" @click="submit" v-bind:class="{ 'btn_disable' : submitLock }">提交</a>
+    <!--性别-->
+    <mt-actionsheet :actions="sexs" cancelText="" v-model="sexVisible"></mt-actionsheet>
+    <!--出生日期：-->
+    <mt-datetime-picker v-model="defaultDate" ref="birthpPicker" :startDate="startDate" :endDate="endDate" type="date" year-format="{value} 年" month-format="{value} 月" date-format="{value} 日" @confirm="confirmBirthp"></mt-datetime-picker>
+    <!--所在地-->
+    <mt-popup v-model="regionVisible" position="bottom" class="mint-popup">
+      <div class="picker-toolbar">
+        <span class="mint-datetime-action mint-datetime-cancel" @click="cancelRegion">取消</span>
+        <span class="mint-datetime-action mint-datetime-confirm" @click="confirmRegion">确定</span>
+      </div>
+      <mt-picker :slots="regions" :visible-item-count="5" @change="regionChange"></mt-picker>
+    </mt-popup>
+  </div>
+</template>
+<script>
+
+import { Actionsheet, Toast, DatetimePicker, MessageBox } from 'mint-ui'
+import { getToken } from '@/utils/auth'
+import request from "@/utils/request"
+import moment from "moment"
+import regions_data from '../../data/address.json'
+import '@/utils/validate.js'
+
+export default {
+  name: "carrousel",
+  data() {
+    return {
+      submitLock: false,//提交锁
+      nickname: '',//昵称
+      /**
+       * 性别选择
+       */
+      sex: '',//性别
+      sexVisible: false,//是否显示性别选择面板
+      sexs: [
+        { "name": "男", method: () => { this.sex = "1"; } },
+        { "name": "女", method: () => { this.sex = "2"; } },
+        { "name": "保密", method: () => { this.sex = "3"; } }
+      ],
+      /**
+       * 区域选择
+       */
+      reversedRegion: '',//所在地区
+      regionVisible: false,//是否显示区域选择面板
+      regionsProvince: '',//所在地省份
+      regionsCity: '',//所在地城市
+      regionscounty: '',//所在地属区
+      regions: [
+        {
+          flex: 1,
+          defaultIndex: 1,
+          values: Object.keys(regions_data),
+          className: 'slot1',
+          textAlign: 'center'
+        }, {
+          divider: true,
+          content: '-',
+          className: 'slot2'
+        }, {
+          flex: 1,
+          values: [""],
+          className: 'slot3',
+          textAlign: 'center'
+        },
+        {
+          divider: true,
+          content: '-',
+          className: 'slot4'
+        },
+        {
+          flex: 1,
+          values: [""],
+          className: 'slot5',
+          textAlign: 'center'
+        }
+      ],
+      reversedBirth: '',//出生日期
+      defaultDate: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 365 * 18),//默认日期
+      startDate: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 365 * 100),//最小可选择日期
+      endDate: new Date()//最大可选择日期
+    };
+  },
+  components: {
+  },
+  computed: {
+    reversedSex: function () {
+      return this.sex == 1 ? "男" : (this.sex == 2 ? "女" : this.sex == 3 ? "保密" : "");
+    }
+  },
+  mounted() {
+
+    request.post("/user/getUserInfo").then(result => {
+      // console.log(result);
+    }).catch(error => {
+      // console.log(error);
+    });
+
+    this.$nextTick(() => {
+      this.regions[0].defaultIndex = 0;
+    });
+  },
+  methods: {
+
+    actionSex: function () {
+      this.sexVisible = true;
+    },
+    actionRegion: function () {
+      this.regionVisible = true;
+    },
+    regionChange(picker, values) {
+      if (regions_data[values[0]]) {
+        picker.setSlotValues(1, Object.keys(regions_data[values[0]]));
+        picker.setSlotValues(2, regions_data[values[0]][values[1]]);
+        this.regionsProvince = values[0];
+        this.regionsCity = values[1];
+        this.regionscounty = values[2];
+      }
+    },
+    cancelRegion: function () {
+      this.regionVisible = false;
+    },
+    confirmRegion: function () {
+      this.regionVisible = false;
+      this.reversedRegion = this.regionsProvince + this.regionsCity + this.regionscounty;
+    },
+    actionBirth: function () {
+      this.$refs.birthpPicker.open();
+    },
+    confirmBirthp: function (data) {
+      this.reversedBirth = moment(data).format('YYYY-MM-DD');
+    },
+    submit: function () {
+
+      if (this.submitLock) {
+        return;
+      }
+      this.$validator.validateAll().then((flag) => {
+
+        if (!flag) {
+          return;
+        }
+        this.submitLock = true;
+        request.post("/user/editUserInfo", {
+          user: {
+            nickname: this.nickname,
+            sex: this.sex,
+            birth: this.reversedBirth,
+            region: this.reversedRegion
+          }
+        }).then(e => {
+          if (!e.err) {
+            Toast("资料修改成功!");
+          } else {
+            Toast("资料修改失败，请稍后重试!");
+            this.submitLock = false;
+          }
+        }).catch(error => {
+          Toast(error);
+          this.submitLock = false;
+        });
+      });
+    }
+  }
+};
+</script>
+<style lang="scss" scoped>
+.mint-popup {
+  width: 100%;
+}
+ul {
+  margin-top: 2rem;
+  li {
+    height: 3rem;
+    line-height: 3rem;
+    border-bottom: 1px solid #bbbb;
+    width: 90%;
+    margin: 0 auto;
+    overflow: hidden;
+    label {
+      width: 30%;
+      display: block;
+      text-align: right;
+      float: left;
+      color: #333;
+      font-size: 1rem;
+    }
+    .to_select {
+      display: block;
+      width: 70%;
+      height: 100%;
+      float: left;
+      text-indent: 0.5rem;
+      color: #666;
+    }
+    input {
+      width: 70%;
+      float: left;
+      height: 100%;
+      text-indent: 0.5rem;
+      color: #666;
+      font-size: 1rem;
+    }
+  }
+}
+.msg {
+  color: red;
+  font-size: 0.9rem;
+  text-align: right;
+  padding-right: 1.3rem;
+  line-height: 3rem;
+  margin-bottom: -3rem;
+}
+a.btn {
+  background: #82abba;
+  width: 7rem;
+  display: block;
+  height: 3rem;
+  border-radius: 0.8rem;
+  line-height: 3rem;
+  text-align: center;
+  color: #fff;
+  font-size: 1.1rem;
+  margin: 3rem auto;
+  &.btn_disable {
+    background: #999;
+  }
+}
+</style>

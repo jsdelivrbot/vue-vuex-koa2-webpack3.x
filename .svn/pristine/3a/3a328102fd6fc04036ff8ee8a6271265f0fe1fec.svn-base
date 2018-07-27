@@ -1,0 +1,14 @@
+var mongoose = require('mongoose'),
+    Schema = mongoose.Schema;
+
+var schema = new Schema({
+
+    'uid': String, //我的id
+    'relation_uid': String,//关联用户id
+    'last_touch_date': String,//最后联系时间
+    'last_touch_content': String,//最后联系内容
+    'relationship': Number//关系 1:临时会话，2：好友
+
+});
+
+mongoose.model('contacts', schema);

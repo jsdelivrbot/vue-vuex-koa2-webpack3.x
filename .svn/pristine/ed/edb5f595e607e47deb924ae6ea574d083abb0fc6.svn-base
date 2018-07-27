@@ -1,0 +1,116 @@
+<template>
+  <div>
+    <ul>
+      <li>
+        <label>昵称：</label>
+        <input type="text" />
+      </li>
+      <li>
+        <label>性别：</label>
+        <span class="to_select" @click="actionSex">{{reversedSex}}</span>
+      </li>
+      <li>
+        <label>年龄：</label>
+        <input type="text" />
+      </li>
+      <li>
+        <label>所在地：</label>
+        <input type="text" />
+      </li>
+    </ul>
+    <a class="btn">提交</a>
+    <!--性别-->
+    <mt-actionsheet :actions="sexs" cancelText="" v-model="sexVisible"></mt-actionsheet>
+  </div>
+</template>
+<style lang="scss" scoped>
+ul {
+  margin: 2rem 0;
+  li {
+    height: 3rem;
+    line-height: 3rem;
+    border-bottom: 1px solid #bbbb;
+    width: 90%;
+    margin: 0 auto;
+    overflow: hidden;
+    label {
+      width: 20%;
+      display: block;
+      text-align: right;
+      float: left;
+      color: #333;
+      font-size: 1rem;
+    }
+    .to_select {
+      display: block;
+      width: 80%;
+      height: 100%;
+      float: left;
+      text-indent: 0.5rem;
+      color: #666;
+    }
+    input {
+      width: 75%;
+      float: left;
+      height: 100%;
+      text-indent: 0.5rem;
+      color: #666;
+      font-size: 1rem;
+    }
+  }
+}
+a.btn {
+  background: #82abba;
+  width: 7rem;
+  display: block;
+  height: 3rem;
+  border-radius: 0.8rem;
+  line-height: 3rem;
+  text-align: center;
+  color: #fff;
+  font-size: 1.1rem;
+  margin: 0 auto;
+}
+</style>
+<script>
+
+import { Actionsheet, Toast, MessageBox } from 'mint-ui'
+import { getToken } from '@/utils/auth'
+import request from "@/utils/request"
+
+export default {
+  name: "carrousel",
+  data() {
+    return {
+      sex: '',
+      sexVisible: false,
+      sexs: [
+        { "name": "男", method: () => { this.sex = "1"; } },
+        { "name": "女", method: () => { this.sex = "2"; } },
+        { "name": "保密", method: () => { this.sex = "0"; } }
+      ]
+    };
+  },
+  components: {
+  },
+  computed: {
+    reversedSex: function(){
+      return this.sex == 0 ? "保密" : (this.sex == 1 ? "男" : "女");
+    }
+  },
+  mounted() {
+
+    request.post("/user/getUserInfo").then(result => {
+      // console.log(result);
+    }).catch(error => {
+      // console.log(error);
+    });
+  },
+  methods: {
+
+    actionSex: function () {
+      this.sexVisible = true;
+    }
+  }
+};
+</script>

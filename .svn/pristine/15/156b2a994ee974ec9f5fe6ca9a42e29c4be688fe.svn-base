@@ -1,0 +1,96 @@
+{
+  "_from": "koa-socket.io",
+  "_id": "koa-socket.io@1.1.2",
+  "_inBundle": false,
+  "_integrity": "sha1-/8QxhtN0+OwSrWapDiOU1kfeWUo=",
+  "_location": "/koa-socket.io",
+  "_phantomChildren": {
+    "after": "0.8.2",
+    "backo2": "1.0.2",
+    "base64-arraybuffer": "0.1.5",
+    "base64id": "1.0.0",
+    "blob": "0.0.4",
+    "component-bind": "1.0.0",
+    "component-inherit": "0.0.3",
+    "cookie": "0.3.1",
+    "has-binary": "0.1.7",
+    "has-cors": "1.1.0",
+    "indexof": "0.0.1",
+    "json3": "3.3.2",
+    "mime-types": "2.1.18",
+    "negotiator": "0.6.1",
+    "object-component": "0.0.3",
+    "options": "0.0.6",
+    "parsejson": "0.0.3",
+    "parseqs": "0.0.5",
+    "parseuri": "0.0.5",
+    "to-array": "0.1.4",
+    "wtf-8": "1.0.0",
+    "yeast": "0.1.2"
+  },
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "koa-socket.io",
+    "name": "koa-socket.io",
+    "escapedName": "koa-socket.io",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#DEV:/",
+    "#USER",
+    "/koa-socket-session"
+  ],
+  "_resolved": "https://registry.npmjs.org/koa-socket.io/-/koa-socket.io-1.1.2.tgz",
+  "_shasum": "ffc43186d374f8ec12ad66a90e2394d647de594a",
+  "_spec": "koa-socket.io",
+  "_where": "E:\\codes\\ue_task\\travel\\travel-server",
+  "author": {
+    "name": "LnsooXD"
+  },
+  "bugs": {
+    "url": "https://github.com/LnsooXD/koa-socket.io/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "debug": "^2.6.6",
+    "depd": "^1.1.0",
+    "is-type-of": "^1.0.0",
+    "koa-compose": "^4.0.0",
+    "koa-convert": "^1.2.0",
+    "not-type-of": "^1.0.1",
+    "socket.io": "^1.7.3"
+  },
+  "deprecated": false,
+  "description": "Attaches socket.io to koa and allows koa-style middleware for sockets",
+  "devDependencies": {
+    "koa": "^2.2.0",
+    "koa-static": "^3.0.0"
+  },
+  "engines": {
+    "node": ">= 7.6"
+  },
+  "files": [
+    "LICENSE",
+    "README.md",
+    "lib"
+  ],
+  "homepage": "https://github.com/LnsooXD/koa-socket.io#readme",
+  "keywords": [
+    "koa",
+    "socket.io"
+  ],
+  "license": "MIT",
+  "main": "lib",
+  "name": "koa-socket.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LnsooXD/koa-socket.io.git"
+  },
+  "scripts": {
+    "example": "cd example && DEBUG=koa-socket.io:* node ."
+  },
+  "version": "1.1.2"
+}

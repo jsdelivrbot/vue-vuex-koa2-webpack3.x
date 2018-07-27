@@ -1,0 +1,24 @@
+/**
+ * 更改 Vuex 的 store 中的状态的唯一方法是提交 mutation
+ */
+
+
+//更新登录状态
+export const changeIsLogin = (state, e) => {
+    state.isLogin = e;
+}
+
+//底部Tabbar状态
+export const changeTabbarStatus = (state, e) => {
+    state.tabbarStatus = e;
+}
+
+//未读消息数量
+export const changeUnreadMessageCount = (state, e) => {
+    state.unreadMessageCount = e;
+}
+
+//消息可读状态
+export const changeReadable = (state, e) => {
+    state.isReadable = e;
+}

@@ -1,0 +1,330 @@
+<template>
+  <div>
+    <section class="personal">
+      <img class="portrait" @click="actionPortrait" :src="user.portrait_img_src || require('./images/default_portrait.png')" />
+      <span class="nickname">{{user.nickname}}</span>
+      <router-link to="/datum" class="info"></router-link>
+    </section>
+    <section class="menu">
+      <ul class="business">
+        <li>
+          <a>
+            <label>我的游记</label>
+            <span>0篇</span>
+          </a>
+        </li>
+        <li>
+          <a>
+            <label>我的结伴</label>
+            <span>0个</span>
+          </a>
+        </li>
+        <li>
+          <a>
+            <label>我的消息</label>
+            <span>0条</span>
+          </a>
+        </li>
+        <li>
+          <a>
+            <label>我的收藏</label>
+            <span>0条</span>
+          </a>
+        </li>
+        <li>
+          <a>
+            <label>邀请好友</label>
+            <span>0条</span>
+          </a>
+        </li>
+      </ul>
+      <ul class="system">
+        <li>
+          <a>
+            <label>客服中心</label>
+            <i></i>
+          </a>
+        </li>
+        <li>
+          <a>
+            <label>安全中心</label>
+            <i></i>
+          </a>
+        </li>
+        <li>
+          <a>
+            <label>帮助中心</label>
+          </a>
+        </li>
+      </ul>
+    </section>
+    <!--选择头像-->
+    <mt-popup v-model="portraitVisible" class="mint-popup">
+      <ul class="portraits">
+        <li v-bind:class="item.portrait_code == portrait_select_code ? 'active' : ''" v-for="(item, index) in portraits" :key="index">
+          <img @click="changePortrait(item.portrait_code)" :src="item.portrait_img_src" />
+        </li>
+      </ul>
+      <div class="btns">
+        <a @click="confirmRegion">确认</a>
+        <a class="cancel" @click="cancelRegion">取消</a>
+      </div>
+    </mt-popup>
+  </div>
+</template>
+<style lang="scss" scoped>
+.mint-popup {
+  border-radius: 1rem;
+  .portraits {
+    border-radius: 1rem;
+    overflow: hidden;
+    width: 24rem;
+    li {
+      float: left;
+      width: 6rem;
+      overflow: hidden;
+      height: 6rem;
+      text-align: center;
+      border: 1px solid #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      &.active {
+        background: #dedede;
+      }
+      img {
+        max-width: 80%;
+        max-height: 80%;
+      }
+    }
+  }
+  .btns {
+    text-align: center;
+    margin: 1.2rem 0;
+    a {
+      display: inline-block;
+      width: 6rem;
+      background: #82abba;
+      height: 2rem;
+      line-height: 2rem;
+      text-align: center;
+      border-radius: 0.8rem;
+      color: #fff;
+      margin: 0 0.8rem;
+      &.cancel {
+        background: #999;
+      }
+    }
+  }
+}
+.personal {
+  text-align: center;
+  overflow: hidden;
+  background: #82abba;
+  position: relative;
+  .portrait {
+    width: 7rem;
+    height: 7rem;
+    display: block;
+    margin: 3rem auto 1rem;
+    border-radius: 12rem;
+    box-shadow: 0rem 0rem 1.5rem rgba(255, 255, 255, 0.8);
+    border: 4px solid rgba(255, 255, 255, 0.4);
+  }
+  .nickname {
+    color: #fff;
+    display: block;
+    margin-bottom: 2rem;
+    height: 1rem;
+  }
+  a.info {
+    display: block;
+    background: url("./images/geren.svg") no-repeat center center;
+    background-size: contain;
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+}
+.menu {
+  ul {
+    margin: 1rem 0;
+    box-shadow: 0px 0px 50px #efefef;
+    li {
+      height: 3.2rem;
+      line-height: 3.4rem;
+      border-bottom: 1px solid #efefef;
+      text-indent: 3rem;
+      overflow: hidden;
+      background: no-repeat 1rem center;
+      &:last-child {
+        border-bottom: 0px;
+      }
+      span {
+        float: right;
+        padding-right: 1.2rem;
+        font-size: 0.8rem;
+        color: #666;
+      }
+      i {
+        background: #ff6b6b;
+        width: 0.5rem;
+        height: 0.5rem;
+        float: right;
+        border-radius: 10rem;
+        margin-right: 1.6rem;
+        margin-top: 1.4rem;
+      }
+    }
+    &:nth-child(1) {
+      li {
+        &:nth-child(1) {
+          background-image: url("./images/youji.svg");
+          background-size: 1.8rem;
+        }
+        &:nth-child(2) {
+          background-image: url("./images/jieban.svg");
+          background-size: 1.8rem;
+        }
+        &:nth-child(3) {
+          background-image: url("./images/xiaoxi.svg");
+          background-size: 1.8rem;
+        }
+        &:nth-child(4) {
+          background-image: url("./images/shoucang.svg");
+          background-size: 1.8rem;
+        }
+        &:nth-child(5) {
+          background-image: url("./images/yaoqing.svg");
+          background-size: 1.8rem;
+        }
+      }
+    }
+    &:nth-child(2) {
+      li {
+        &:nth-child(1) {
+          background-image: url("./images/kefu.svg");
+          background-size: 1.8rem;
+        }
+        &:nth-child(2) {
+          background-image: url("./images/anquan.svg");
+          background-size: 1.8rem;
+        }
+        &:nth-child(3) {
+          background-image: url("./images/bangzhu.svg");
+          background-size: 1.8rem;
+        }
+      }
+    }
+  }
+}
+</style>
+<script>
+
+import { Toast, MessageBox } from 'mint-ui'
+import { getToken } from '@/utils/auth'
+import request from "@/utils/request"
+import config from '../../../config'
+
+export default {
+  name: "carrousel",
+  data() {
+    return {
+      user: {},//昵称
+      portrait_code: "",//用户当前头像id
+      portrait_select_code: "",//当前切换选择的头像
+      portraits: [],//系统头像组
+      portraitVisible: false//是否显示选择头像浮层
+    };
+  },
+  components: {
+  },
+  computed: {
+  },
+  mounted() {
+
+    /**
+     * 获取用户信息
+     */
+    this.getUserInfo();
+
+  },
+  methods: {
+
+    getUserInfo: function () {
+
+      request.post("/user/getUserInfo").then(e => {
+        if (e.err) {
+          Toast(e.err);
+        } else {
+          let user = e.result.user || {};
+          this.user = user;
+
+          this.portrait_code = user.portrait_code;
+          this.portrait_select_code = user.portrait_code;
+        }
+      }).catch(error => {
+        Toast(error);
+      });
+    },
+    /**
+     * 选择头像
+     */
+    actionPortrait: function () {
+
+      request.post("/platform/getPortraits").then(e => {
+        if (e.err) {
+          Toast(e.err);
+        } else {
+          this.portraits = e.result.portraits;
+          this.portraitVisible = true;
+        }
+      }).catch(error => {
+        Toast(error);
+      });
+
+    },
+    /**
+     * 切换选择头像
+     */
+    changePortrait: function (portrait_code) {
+
+      this.portrait_select_code = portrait_code;
+    },
+    /**
+     * 取消选择头像
+     */
+    cancelRegion: function () {
+
+      this.portraitVisible = false;
+      this.portrait_select_code = this.portrait_code;//重置
+    },
+    /**
+     * 确认选择头像
+     */
+    confirmRegion: function () {
+
+      this.portraitVisible = false;
+      this.portrait_code = this.portrait_select_code;//重置
+
+      request.post("/user/editUserInfo", {
+        user: {
+          portrait_code: this.portrait_code,
+          portrait_img_src: config.staticPrefix + `/portrait/${this.portrait_code}.png`
+        }
+      }).then(e => {
+        if (e.err) {
+          Toast(e.err);
+        } else {
+          Toast("头像修改成功!");
+          this.user = e.result.user;
+        }
+      }).catch(error => {
+        Toast(error);
+      });
+    }
+  }
+};
+</script>

@@ -1,0 +1,49 @@
+<template>
+  <div>
+    <router-view></router-view>
+    <mt-tabbar v-model="tabbar_selected" :fixed="true">
+      <mt-tab-item id="index">
+        <img slot="icon" :src="tabbar_icons.index"> 首页
+      </mt-tab-item>
+      <mt-tab-item id="message">
+        <img slot="icon" :src="tabbar_icons.message"> 消息
+      </mt-tab-item>
+      <mt-tab-item id="mine">
+        <img slot="icon" :src="tabbar_icons.mine"> 我的
+      </mt-tab-item>
+    </mt-tabbar>
+  </div>
+</template>
+<style lang="scss" scoped>
+.mint-tab-item {
+  &.is-selected {
+    color: #008b8b;
+    background: none;
+  }
+}
+</style>
+<script>
+
+import { Tabbar, TabItem } from 'mint-ui';
+
+export default {
+  data: function () {
+    return {
+      tabbar_selected: 'index',//默认选中节点
+      tabbar_icons: {//节点icon组
+        index: require("./images/icon-index.png"),
+        message: require("./images/icon-message.png"),
+        mine: require("./images/icon-mine.png")
+      }
+    }
+  },
+  watch: {
+    tabbar_selected: function (item, oldItem) {
+      this.tabbar_icons[item] = require("./images/icon-" + item + "-active.png");//添加active
+      this.tabbar_icons[oldItem] = require("./images/icon-" + oldItem + ".png");//删除active
+      this.$router.push('/' + item);
+    }
+  }
+
+}
+</script>

@@ -1,0 +1,51 @@
+import axios from 'axios'
+import * as config from '../../config'
+import { getToken } from '@/utils/auth'
+import { getCookie } from '@/utils/cookie'
+import { Toast } from 'mint-ui'
+
+const instance = axios.create({
+    // `baseURL` 将自动加在 `url` 前面，除非 `url` 是一个绝对 URL。
+    // 它可以通过设置一个 `baseURL` 便于为 axios 实例的方法传递相对 URL
+    baseURL: config.dev.apiBaseURL,
+    // `headers` 是即将被发送的自定义请求头
+    headers: {
+        'Authorization' : 'Bearer ' + getCookie('token')
+    },
+    // `transformRequest` 允许在向服务器发送前，修改请求数据
+    // 只能用在 'PUT', 'POST' 和 'PATCH' 这几个请求方法
+    // 后面数组中的函数必须返回一个字符串，或 ArrayBuffer，或 Stream
+    // transformRequest: [function (data) {
+    //     return JSON.stringify(data);
+    // }],
+    // 表示跨域请求时是否需要使用凭证
+    withCredentials: true,
+    // `timeout` 指定请求超时的毫秒数(0 表示无超时时间)
+    // 如果请求话费了超过 `timeout` 的时间，请求将被中断
+    timeout: 2000,
+    // `responseType` 表示服务器响应的数据类型，可以是 'arraybuffer', 'blob', 'document', 'json', 'text', 'stream'
+    responseType: 'json', // 默认的
+    // `maxContentLength` 定义允许的响应内容的最大尺寸
+    maxContentLength: 2000,
+});
+
+// 添加请求拦截器
+instance.interceptors.request.use(request => {
+
+    return Promise.resolve(request);
+
+}, error => {
+
+    return Promise.reject(error);
+});
+
+// 添加响应拦截器
+instance.interceptors.response.use(response => {
+    return Promise.resolve(response.data.result);
+
+}, error => {
+
+    return Promise.reject(error);
+});
+
+export default instance;

@@ -1,0 +1,192 @@
+const mongodb = require('mongodb')
+const userDao = require('../daos/userDao')
+const contactsDao = require('../daos/contactsDao');
+const vcodeDao = require('../daos/vcodeDao')
+const { getToken } = require('../middleware/token')
+const mailServer = require('../server/mailServer')
+const config = require('../config.js')
+const cookieUtil = require('../utils/cookieUtil');
+const store = require('../store');//session容器
+
+/**
+ * 发送注册验证码
+ */
+module.exports.sendCode = async (ctx, next) => {
+
+    let body = ctx.request.body;
+
+    // 验证邮箱|手机号是否已经注册
+    let uResult = await userDao.prototype.countByQuery({ "email": body.email }).then(e => {
+        return e;
+    });
+
+    if (uResult.data != 0) {
+        ctx.body = { "err": "邮箱已经注册!", "result": { "count": null } }
+        return;
+    }
+
+    // 发送验证码
+    let code = Math.floor(Math.random() * 9000) + 1000, status;
+    let vResult = await vcodeDao.prototype.create({ "relation_id": body.email, "code": code, "create_date": new Date().getTime() }).then(e => {
+        return e;
+    });
+
+    if (!vResult.err) {
+        status = await mailServer.send({
+            to: body.email, // 接受邮箱
+            subject: '【狐狸笑】注册验证码', // 标题
+            html: `您的验证码是：<span style="color:red;font-size:16px;">${code}</span>，有效时间：10分钟` // 内容
+        }).then(e => {
+            return e;
+        });
+    }
+
+    ctx.body = { "err": ((vResult.err || !status) ? "邮件发送失败!" : ""), "result": null }
+}
+
+/**
+ * 用户注册
+ * @param {*} ctx 
+ * @param {*} next 
+ */
+module.exports.register = async (ctx, next) => {
+
+    let body = ctx.request.body;
+
+    // 验证验证码是否输入错误
+    let time = new Date(new Date().getTime() - 1000 * 60 * 5).getTime();
+    let vResult = await vcodeDao.prototype.getByQuery({ "relation_id": body.email, "create_date": { $gte: time } }, {}, { sort: { "create_date": -1 }, skip: 0, limit: 1 }).then(e => {
+        return e;
+    });
+    let arr = vResult.data;
+    if (arr.length && arr[0]["code"] != body.validateCode) {
+        ctx.body = { "err": "验证码错误!", "result": { "count": null } }
+        return;
+    }
+
+    // 用户注册
+    let uResult = await userDao.prototype.create({ "email": body.email, "password": body.password, "nickname": "无名氏", "portrait_code": "1001", "create_date": new Date().getTime(), "update_date": new Date().getTime() }).then(e => {
+        return e;
+    });
+
+    let uid = uResult.data["_id"];
+
+    let allUser = await userDao.prototype.getByQuery({ "_id": { $ne: mongodb.ObjectId(uid) } }).then(e => {
+        return (e || {}).data || [];
+    });
+
+    // 建立关系
+    for (let [index, item] of allUser.entries()) {
+
+        contactsDao.prototype.create({ "uid": mongodb.ObjectId(uid), "relation_uid": mongodb.ObjectId(item["_id"]), "relationship": 3 }).then(e => {
+            return e;
+        });
+    }
+
+    ctx.body = { "err": uResult.err, "result": { "count": uResult.data } }
+}
+
+/**
+ * 用户登录
+ * @param {*} ctx 
+ * @param {*} next 
+ */
+module.exports.login = async (ctx, next) => {
+
+    let body = ctx.request.body,
+        uResult;
+
+    // 查询邮箱是否注册
+    if (body.email) {
+        uResult = await userDao.prototype.getByQuery({ "email": body.email }, {}, {}).then(e => {
+            return e;
+        });
+        if (!uResult.data.length) {
+            ctx.body = { "err": "邮箱尚未注册!", "result": { "token": null } }
+            return;
+        }
+    }
+
+    // 查询手机是否注册
+    if (body.phone) {
+        uResult = await userDao.prototype.getByQuery({ "phone": body.phone }, {}, {}).then(e => {
+            return e;
+        });
+        if (!uResult.data.length) {
+            ctx.body = { "err": "手机号尚未注册!", "result": { "token": null } }
+            return;
+        }
+    }
+
+    // 登录
+    uResult = await userDao.prototype.getByQuery({ "email": body.email, "password": body.password }, {}, {}).then(e => {
+        return e;
+    });
+
+    // 密码不匹配
+    if (!uResult.data.length) {
+        ctx.body = { "err": "用户名与密码不匹配!", "result": { "token": null } }
+        return;
+    }
+
+    // 当前用户
+    let user = uResult.data[0];
+
+    // 存储当前用户信息到session中
+    ctx.session.user = user;
+
+    // 生成token
+    let token = getToken({ name: user.emial });
+
+    // 登录成功
+    ctx.body = { "err": uResult.err, "result": { "token": token } }
+    return;
+}
+
+/**
+ * 获取当前登录用户信息
+ * @param {*} ctx 
+ * @param {*} next 
+ */
+module.exports.getUserInfo = (ctx, next) => {
+
+    return new Promise((resolve, reject) => {
+        let _id = ctx.session.user._id;
+        userDao.prototype.getByQuery({ "_id": { $eq: mongodb.ObjectId(_id) } }, { "_id": 0, "__v": 0, "create_date": 0, "update_date": 0, "password": 0 }, {}).then(e => {
+            let user = e.data[0];
+            ctx.body = { "err": e.err, "result": { "user": user } };
+            resolve(next())
+        });
+    }).catch(error => console.log(error))
+}
+
+/**
+ * 更新当前登录用户信息
+ * @param {*} ctx 
+ * @param {*} next 
+ */
+module.exports.editUserInfo = (ctx, next) => {
+
+    return new Promise((resolve, reject) => {
+
+        let _id = ctx.session.user._id,
+            user = ctx.request.body.user;
+
+        // 更新用户
+        userDao.prototype.update({ "_id": _id }, user, {}).then(e => {
+
+            // 更新session
+            userDao.prototype.getByQuery({ "_id": { $eq: mongodb.ObjectId(_id) } }, { "__v": 0, "create_date": 0, "update_date": 0, "password": 0 }, {}).then(e => {
+                let user = e.data[0];
+                let cookie = ctx.request.headers.cookie,
+                    sessionId = cookieUtil.getCookie(cookie, config.sessionIdKey);
+                ctx.session.user = user;
+                store.set(sessionId, user);
+                ctx.body = { "err": e.err, "result": { "user": user } };
+                resolve(next())
+            });
+
+        });
+
+    }).catch(error => console.log(error))
+}

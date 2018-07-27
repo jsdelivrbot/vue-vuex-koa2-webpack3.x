@@ -1,0 +1,9 @@
+module.exports = {
+
+    /**
+     * 格式
+     * mongodb://[username:password@]host:port/database[?options]
+     * @type {String}
+     */
+    connection : 'mongodb://172.20.17.125:27017/hulixiao'
+}

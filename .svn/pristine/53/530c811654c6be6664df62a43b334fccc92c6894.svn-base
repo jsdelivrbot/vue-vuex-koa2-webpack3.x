@@ -1,0 +1,22 @@
+const vcodeDao = require('../daos/vcodeDao')
+const mailServer = require('../server/mailServer')
+
+module.exports.sendCode = async (ctx, next) => {
+
+    let body = ctx.request.body;
+    let code = Math.floor(Math.random() * 10000);
+
+    let result = await vcodeDao.prototype.create({ "relation_id": body.email, "code": code, "create_date": Date.now() }).then(e => {
+        return e;
+    });
+
+    let status = await mailServer.send({
+        to: body.email, // 接受邮箱
+        subject: '【狐狸笑】注册验证码', // 标题
+        html: `您的验证码是：<span style="color:red;font-size:16px;">${code}</span>，有效时间：10分钟` // 内容
+    }).then(e => {
+        return e;
+    });
+
+    ctx.body = { "err": result.err, "data": { "status": status } }
+}

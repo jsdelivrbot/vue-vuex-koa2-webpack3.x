@@ -1,0 +1,7 @@
+const router = require('koa-router')()
+const contactsControl = require('../controllers/contactsControl');
+
+router.prefix('/api/contacts')
+    .post('/getAll', contactsControl.getAll)//发送用户验证码
+
+module.exports = router

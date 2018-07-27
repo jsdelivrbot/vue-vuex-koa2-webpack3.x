@@ -1,0 +1,1 @@
+module.exports = {"user":{"_id":"5b3ca18aeaabba1508318785","email":"419272450@qq.com","password":"e10adc3949ba59abbe56e057f20f883e","portrait_code":"1001","create_date":"1530700170741","update_date":"1530700170741","__v":0},"_expire":1530786685600,"_maxAge":86400000};
